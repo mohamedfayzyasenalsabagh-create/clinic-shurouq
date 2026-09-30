@@ -1,11 +1,11 @@
-// إعدادات Firebase — تنلصق من Firebase Console › Project settings › Your apps › Web app
+// إعدادات Firebase لمشروع clinic-shurouq
 export const firebaseConfig = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT.firebaseapp.com",
-  projectId: "PASTE_PROJECT",
-  storageBucket: "PASTE_PROJECT.appspot.com",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
+  apiKey: "AIzaSyBDzgF_19q1LdimhCASwthUcZYUJJ2-lDk",
+  authDomain: "clinic-shurouq-60af2.firebaseapp.com",
+  projectId: "clinic-shurouq-60af2",
+  storageBucket: "clinic-shurouq-60af2.firebasestorage.app",
+  messagingSenderId: "948656759718",
+  appId: "1:948656759718:web:26d0d94cc0152ce8ba2567"
 };
 
 // معرّف العيادة (لا تغيّره)
