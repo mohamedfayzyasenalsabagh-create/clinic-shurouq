@@ -1,0 +1,17 @@
+{
+  "name": "عيادة د. شروق صليبي",
+  "short_name": "عيادة د. شروق",
+  "description": "المواعيد والملف الطبي ومتابعة الحمل",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F7F3FA",
+  "theme_color": "#6B3FA0",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

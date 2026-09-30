@@ -1,0 +1,191 @@
+rules_version = '2';
+// قواعد حماية نظام عيادة د. شروق صليبي
+// - كل مستخدم بيشوف بس يلي بيخصه
+// - السكرتارية ما بتشوف أي تفاصيل طبية
+// - ما في حذف نهائي لأي شي (أرشفة فقط)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function userPath() { return /databases/$(database)/documents/users/$(request.auth.uid); }
+    function hasProfile() { return signedIn() && exists(userPath()); }
+    function me() { return get(userPath()).data; }
+    function active() { return hasProfile() && me().active == true; }
+    function inClinic(c) { return active() && me().clinicId == c; }
+    function isDoctor(c) { return inClinic(c) && me().role == 'doctor'; }
+    function isStaff(c) { return inClinic(c) && me().role in ['doctor', 'secretary']; }
+    function isPatient(c, pid) { return inClinic(c) && me().role == 'patient' && pid in me().patientIds; }
+    function onlyChanged(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+    function setupPath() { return /databases/$(database)/documents/config/setup; }
+    function settingUp() { return signedIn() && !exists(setupPath()) && existsAfter(setupPath()); }
+
+    // ---------- الإعداد العام ----------
+    match /config/setup {
+      allow read: if true;
+      allow create: if settingUp()
+        && getAfter(userPath()).data.role == 'doctor';
+      allow update, delete: if false;
+    }
+    match /config/public {
+      allow read: if true;
+      allow create: if settingUp();
+      allow update: if isDoctor('main');
+      allow delete: if false;
+    }
+
+    // ---------- الحسابات ----------
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isStaff(resource.data.clinicId));
+      allow create: if
+        (request.auth.uid == uid && settingUp() && request.resource.data.role == 'doctor')
+        || (isDoctor(request.resource.data.clinicId) && request.resource.data.role == 'secretary')
+        || (isStaff(request.resource.data.clinicId) && request.resource.data.role == 'patient'
+            && request.resource.data.active == true);
+      allow update: if
+        (request.auth.uid == uid && onlyChanged(['mustChangePassword', 'consentAt', 'hideSensitive']))
+        || (isDoctor(resource.data.clinicId) && resource.data.role == 'secretary'
+            && onlyChanged(['active', 'name', 'mustChangePassword']))
+        || (isStaff(resource.data.clinicId) && resource.data.role == 'patient'
+            && onlyChanged(['patientIds', 'active', 'mustChangePassword']));
+      allow delete: if false;
+    }
+
+    // ---------- العيادة ----------
+    match /clinics/{c} {
+      allow read: if inClinic(c);
+      allow create: if c == 'main' && settingUp();
+      allow update: if isDoctor(c);
+      allow delete: if false;
+
+      match /phones/{phone} {
+        allow read: if isStaff(c);
+        allow create: if isStaff(c) || (c == 'main' && settingUp());
+        allow update: if isStaff(c);
+        allow delete: if false;
+      }
+
+      match /patients/{pid} {
+        allow read: if isStaff(c) || isPatient(c, pid);
+        allow create: if isStaff(c);
+        allow update: if isStaff(c)
+          || (isPatient(c, pid) && onlyChanged(['lastMsgAt', 'lastMsgFrom']));
+        allow delete: if false;
+
+        // بيانات طبية: الدكتورة تكتب، والمريضة تقرأ ملفها فقط
+        match /medical/{d} {
+          allow read: if isDoctor(c) || isPatient(c, pid);
+          allow create, update: if isDoctor(c);
+          allow delete: if false;
+        }
+        match /visits/{d} {
+          allow read: if isDoctor(c) || isPatient(c, pid);
+          allow create, update: if isDoctor(c);
+          allow delete: if false;
+        }
+        match /prescriptions/{d} {
+          allow read: if isDoctor(c) || isPatient(c, pid);
+          allow create, update: if isDoctor(c);
+          allow delete: if false;
+        }
+        match /pregnancies/{d} {
+          allow read: if isDoctor(c) || isPatient(c, pid);
+          allow create, update: if isDoctor(c);
+          allow delete: if false;
+        }
+        match /fertility/{d} {
+          allow read: if isDoctor(c) || isPatient(c, pid);
+          allow create, update: if isDoctor(c);
+          allow delete: if false;
+        }
+        match /labs/{d} {
+          allow read: if isDoctor(c) || isPatient(c, pid);
+          allow create, update: if isDoctor(c);
+          allow delete: if false;
+        }
+        // ملاحظات خاصة وصور التجميل: للدكتورة فقط
+        match /private/{d} {
+          allow read, create, update: if isDoctor(c);
+          allow delete: if false;
+        }
+        match /procedures/{d} {
+          allow read: if isDoctor(c) || isPatient(c, pid);
+          allow create: if isDoctor(c);
+          allow update: if isDoctor(c)
+            || (isPatient(c, pid) && resource.data.consentSignedAt == null
+                && onlyChanged(['consentSignedAt', 'consentName']));
+          allow delete: if false;
+        }
+        match /files/{d} {
+          allow read: if isDoctor(c) || isPatient(c, pid);
+          allow create: if isDoctor(c)
+            || (isPatient(c, pid) && request.resource.data.uploadedBy == 'patient');
+          allow update: if isDoctor(c);
+          allow delete: if false;
+        }
+        match /messages/{d} {
+          allow read: if isStaff(c) || isPatient(c, pid);
+          allow create: if (isStaff(c) && request.resource.data.from == 'clinic')
+            || (isPatient(c, pid) && request.resource.data.from == 'patient');
+          allow update, delete: if false;
+        }
+      }
+
+      match /appointments/{a} {
+        allow read: if isStaff(c) || isPatient(c, resource.data.patientId);
+        allow create: if isStaff(c);
+        allow update: if isStaff(c)
+          || (isPatient(c, resource.data.patientId)
+              && (onlyChanged(['rating', 'ratingNote'])
+                  || (onlyChanged(['status']) && request.resource.data.status == 'cancelled')));
+        allow delete: if false;
+      }
+
+      match /requests/{r} {
+        allow read: if isStaff(c) || isPatient(c, resource.data.patientId);
+        allow create: if isStaff(c)
+          || (isPatient(c, request.resource.data.patientId) && request.resource.data.status == 'new');
+        allow update: if isStaff(c);
+        allow delete: if false;
+      }
+
+      match /waitlist/{w} {
+        allow read, create, update: if isStaff(c);
+        allow delete: if false;
+      }
+
+      match /payments/{p} {
+        allow read: if isStaff(c) || isPatient(c, resource.data.patientId);
+        allow create: if isStaff(c);
+        allow update: if isDoctor(c);
+        allow delete: if false;
+      }
+
+      match /live/{d} {
+        allow read, create, update: if isStaff(c);
+        allow delete: if false;
+      }
+
+      // تنبيهات الحمل والإحصاءات: للدكتورة فقط
+      match /pregAlerts/{d} {
+        allow read, create, update: if isDoctor(c);
+        allow delete: if false;
+      }
+      match /stats/{d} {
+        allow read, create, update: if isDoctor(c);
+        allow delete: if false;
+      }
+      // ملفات رفعتها المريضات بانتظار الدكتورة
+      match /inbox/{d} {
+        allow read, update: if isDoctor(c);
+        allow create: if isDoctor(c) || isPatient(c, request.resource.data.patientId);
+        allow delete: if false;
+      }
+
+      match /audit/{x} {
+        allow read: if isDoctor(c);
+        allow create: if inClinic(c) && request.resource.data.by == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+  }
+}
