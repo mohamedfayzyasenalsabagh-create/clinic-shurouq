@@ -9,20 +9,20 @@ import { pregCalc, gaText, activeMeds } from "./card.js";
 
 const T = { me: null, pid: null, patients: [] };
 const main = () => $("#main");
-const STATUS = { confirmed: "مؤكد", arrived: "وصلتي", in: "عند الدكتورة", done: "تمت", noshow: "ما حضرتي", cancelled: "ملغى" };
+const STATUS = { confirmed: "مؤكد", arrived: "حضرتِ", in: "لدى الطبيبة", done: "تمت", noshow: "لم تحضري", cancelled: "ملغى" };
 
 // ---------- الموافقة على الخصوصية (أول مرة) ----------
 export function showConsent() {
   $("#app").innerHTML = `<div class="center-page"><div class="card narrow stack">
-    <div class="brand-block small">${logoHtml(S.pub, 64)}<h2>أهلاً فيكي بتطبيق ${esc(S.pub.name || "العيادة")}</h2></div>
-    <p>قبل ما تبلشي، هيك منتعامل مع معلوماتك:</p>
+    <div class="brand-block small">${logoHtml(S.pub, 64)}<h2>مرحباً بكِ في تطبيق ${esc(S.pub.name || "العيادة")}</h2></div>
+    <p>قبل البدء، إليكِ كيف نتعامل مع معلوماتك:</p>
     <ul class="plain dots">
-      <li>ملفك الطبي بتشوفيه إنتي والدكتورة بس.</li>
-      <li>السكرتارية بتشوف اسمك ورقمك ومواعيدك فقط، بدون أي تفاصيل طبية.</li>
-      <li>ما منشارك معلوماتك مع أي جهة بدون إذنك.</li>
-      <li>إذا الرقم مشترك مع حدا من أهلك، فيكي تخفي التفاصيل الطبية من الإعدادات.</li>
+      <li>لا يطّلع على ملفك الطبي سواكِ والطبيبة.</li>
+      <li>تطّلع السكرتارية على اسمك ورقمك ومواعيدك فقط، دون أي تفاصيل طبية.</li>
+      <li>لا نشارك معلوماتك مع أي جهة دون إذنك.</li>
+      <li>إذا كان الرقم مشتركاً مع أحد أفراد أسرتك، يمكنكِ إخفاء التفاصيل الطبية من الإعدادات.</li>
     </ul>
-    <label class="check"><input type="checkbox" class="ag"><span>قرأت وموافقة</span></label>
+    <label class="check"><input type="checkbox" class="ag"><span>قرأتُ وأوافق</span></label>
     <button class="btn primary block go" disabled>متابعة</button>
     <button class="link-btn out">خروج</button></div></div>`;
   $(".ag").onchange = (e) => $(".go").disabled = !e.target.checked;
@@ -43,7 +43,7 @@ export async function start() {
   const ids = T.me.patientIds || [];
   T.patients = (await Promise.all(ids.map((id) => one(P.patient(id)).catch(() => null)))).filter(Boolean);
   if (!T.patients.length) {
-    $("#app").innerHTML = `<div class="center-page"><div class="card narrow"><p>ما لقينا ملفك. تواصلي مع العيادة.</p><button class="btn out">خروج</button></div></div>`;
+    $("#app").innerHTML = `<div class="center-page"><div class="card narrow"><p>لم يُعثر على ملفك. يرجى التواصل مع العيادة.</p><button class="btn out">خروج</button></div></div>`;
     $(".out").onclick = logout; return;
   }
   const saved = sessionStorage.getItem("pid");
@@ -53,7 +53,7 @@ export async function start() {
 }
 function choose() {
   $("#app").innerHTML = `<div class="center-page"><div class="card narrow stack"><h2>اختاري الملف</h2>
-    <p class="muted">هاد الرقم مسجل لأكتر من شخص.</p>
+    <p class="muted">هذا الرقم مسجّل لأكثر من شخص.</p>
     ${T.patients.map((p) => `<button class="btn block pick" data-id="${p.id}">${esc(p.name)}</button>`).join("")}
     <button class="link-btn out">خروج</button></div></div>`;
   $$(".pick").forEach((b) => b.onclick = () => { T.pid = b.dataset.id; sessionStorage.setItem("pid", T.pid); shell(); });
@@ -115,16 +115,16 @@ async function home() {
   main().innerHTML = `
     <h2 class="page-title">أهلاً ${esc(me().name.split(" ")[0])}</h2>
     <section class="card hero">
-      <h3>موعدك الجاي</h3>
+      <h3>موعدك القادم</h3>
       ${next ? `<div class="big-date">${esc(fmtDate(next.date))}</div><div class="big-time">${esc(fmtTime(next.time))}</div><p>${esc(next.type || "")}</p>
         <div class="row gap"><button class="btn small cx" data-id="${next.id}">إلغاء الموعد</button><a class="btn small" href="#/appts">كل المواعيد</a></div>`
-      : `<p class="muted">ما عندك موعد حالياً.</p><button class="btn primary ask-appt">طلب موعد</button>`}
+      : `<p class="muted">لا يوجد لديكِ موعد حالياً.</p><button class="btn primary ask-appt">طلب موعد</button>`}
     </section>
     ${needSign.length ? needSign.map((x) => `<section class="card alert-card"><h3>موافقة بانتظار توقيعك</h3><p>${esc(x.name)}</p><button class="btn primary small sign" data-id="${x.id}">قراءة وتوقيع</button></section>`).join("") : ""}
     ${toRate ? `<section class="card"><h3>كيف كانت زيارتك يوم ${esc(fmtDate(toRate.date, false))}؟</h3><div class="stars" role="group" aria-label="التقييم">${[1, 2, 3, 4, 5].map((n) => `<button class="star" data-n="${n}" data-id="${toRate.id}" aria-label="${n} من 5">★</button>`).join("")}</div></section>` : ""}
     ${g ? (hide ? `<section class="card"><button class="btn block show-s">إظهار متابعة الحمل</button></section>` : pregCard(g, gc)) : ""}
     <section class="card"><div class="row-between"><h3>أدوية اليوم</h3><a class="btn small" href="#/meds">التفاصيل</a></div>
-      ${hide ? `<button class="btn block show-s">إظهار</button>` : doses.length ? `<ul class="dose-list">${doses.map((d) => `<li class="${d === nextDose ? "next" : d.time < nowHm ? "past" : ""}"><span class="t">${esc(fmtTime(d.time))}</span><span><b>${esc(d.drug)}</b> ${esc(d.dose || "")}</span></li>`).join("")}</ul>` : empty("ما في أدوية بمواعيد محددة اليوم")}
+      ${hide ? `<button class="btn block show-s">إظهار</button>` : doses.length ? `<ul class="dose-list">${doses.map((d) => `<li class="${d === nextDose ? "next" : d.time < nowHm ? "past" : ""}"><span class="t">${esc(fmtTime(d.time))}</span><span><b>${esc(d.drug)}</b> ${esc(d.dose || "")}</span></li>`).join("")}</ul>` : empty("لا توجد أدوية بمواعيد محددة اليوم")}
     </section>
     ${after.length && !hide ? after.map((x) => `<section class="card"><h3>تعليمات بعد ${esc(x.name)}</h3><p class="pre">${esc(x.aftercare)}</p></section>`).join("") : ""}
     <section class="card"><h3>معلومات صحية</h3><a class="btn block" href="#/learn">مقالات قصيرة عن الحمل والصحة النسائية</a></section>
@@ -139,9 +139,9 @@ async function home() {
 
 function pregCard(g, c) {
   const tips = {
-    1: "بالثلث الأول: حمض الفوليك مهم، وخففي الكافيين، ولا تاخدي أي دواء بدون ما تسألي الدكتورة.",
-    2: "بالثلث التاني: غالباً بتبلشي تحسي بحركة الجنين. حافظي على الحركة الخفيفة والأكل المتوازن.",
-    3: "بالثلث الأخير: انتبهي لحركة الجنين يومياً، وجهزي شنطة الولادة، وراجعي فوراً إذا في نزيف أو تسرب مي أو نقص بالحركة.",
+    1: "في الثلث الأول: حمض الفوليك مهم، فقلّلي الكافيين، ولا تتناولي أي دواء دون استشارة الطبيبة.",
+    2: "في الثلث الثاني: تبدئين غالباً بالشعور بحركة الجنين. حافظي على النشاط الخفيف والغذاء المتوازن.",
+    3: "في الثلث الأخير: راقبي حركة الجنين يومياً، وجهّزي حقيبة الولادة، وراجعي فوراً عند حدوث نزيف أو تسرب ماء أو نقص في الحركة.",
   };
   const t = c.w < 14 ? 1 : c.w < 28 ? 2 : 3;
   return `<section class="card preg-card"><h3>🤰 حملك: ${esc(gaText(c))}</h3>
@@ -157,10 +157,10 @@ async function appts() {
   const past = apps.filter((a) => !up.includes(a)).reverse();
   const pend = reqs.filter((r) => r.status === "new");
   main().innerHTML = `<div class="row-between"><h2 class="page-title">مواعيدي</h2><button class="btn primary ask-appt">طلب موعد</button></div>
-    ${pend.length ? `<section class="card"><h3>طلبات بانتظار التأكيد</h3>${pend.map((r) => `<p>${esc(fmtDate(r.date))} · ${esc(r.period || "")}</p>`).join("")}<p class="muted small">العيادة بتأكدلك الوقت.</p></section>` : ""}
+    ${pend.length ? `<section class="card"><h3>طلبات بانتظار التأكيد</h3>${pend.map((r) => `<p>${esc(fmtDate(r.date))} · ${esc(r.period || "")}</p>`).join("")}<p class="muted small">ستؤكد العيادة الوقت لكِ.</p></section>` : ""}
     <section class="card"><h3>القادمة</h3>${up.length ? `<ul class="plain">${up.map((a) => `<li class="req"><b>${esc(fmtDate(a.date))}</b> · ${esc(fmtTime(a.time))}<br><span class="muted">${esc(a.type || "")}</span>
-      <div><button class="btn small cx" data-id="${a.id}">إلغاء</button></div></li>`).join("")}</ul>` : empty("ما في مواعيد قادمة")}</section>
-    <section class="card"><h3>السابقة</h3>${past.length ? `<ul class="plain">${past.map((a) => `<li class="row-between"><span>${esc(a.date)} · ${esc(a.type || "")}</span><span class="chip">${esc(STATUS[a.status] || "")}</span></li>`).join("")}</ul>` : empty("ما في")}</section>`;
+      <div><button class="btn small cx" data-id="${a.id}">إلغاء</button></div></li>`).join("")}</ul>` : empty("لا توجد مواعيد قادمة")}</section>
+    <section class="card"><h3>السابقة</h3>${past.length ? `<ul class="plain">${past.map((a) => `<li class="row-between"><span>${esc(a.date)} · ${esc(a.type || "")}</span><span class="chip">${esc(STATUS[a.status] || "")}</span></li>`).join("")}</ul>` : empty("لا يوجد")}</section>`;
   $(".ask-appt").onclick = requestModal;
   $$(".cx").forEach((b) => b.onclick = () => cancelAppt(apps.find((a) => a.id === b.dataset.id)));
 }
@@ -168,26 +168,26 @@ async function appts() {
 async function requestModal() {
   await modal("طلب موعد", `<form class="stack">
     ${field("اليوم المناسب", "date", { type: "date", value: addDays(ymd(), 1), required: true, attrs: `min="${ymd()}"` })}
-    ${select("الوقت المفضل", "period", [["أي وقت", "أي وقت"], ["الصبح", "الصبح"], ["الظهر", "الظهر"], ["المسا", "المسا"]])}
+    ${select("الوقت المفضل", "period", [["أي وقت", "أي وقت"], ["الصباح", "الصباح"], ["الظهر", "الظهر"], ["المساء", "المساء"]])}
     ${select("سبب الزيارة", "type", [["كشفية", "كشفية"], ["مراجعة", "مراجعة"], ["متابعة حمل", "متابعة حمل"], ["إيكو", "إيكو"], ["استشارة تجميلية", "استشارة تجميلية"], ["أخرى", "أخرى"]])}
     ${field("ملاحظة (اختياري)", "note", { type: "textarea" })}
-    <p class="muted small">العيادة بتتواصل معك لتأكيد الوقت.</p></form>`, {
+    <p class="muted small">ستتواصل العيادة معكِ لتأكيد الوقت.</p></form>`, {
     ok: "إرسال الطلب",
     onOk: async (f) => {
       const p = me();
       await addDoc(P.col("requests"), { patientId: p.id, patientName: p.name, phone: p.phone, ...f, status: "new", createdAt: serverTimestamp() });
-      toast("انبعت الطلب، العيادة رح تأكدلك");
+      toast("أُرسل الطلب، وستؤكده العيادة لكِ");
       setTimeout(render, 50);
     }
   });
 }
 
 async function cancelAppt(a) {
-  if (!(await confirmBox("إلغاء الموعد", `بدك تلغي موعد ${fmtDate(a.date)} الساعة ${fmtTime(a.time)}؟`, "إلغاء الموعد", true))) return;
+  if (!(await confirmBox("إلغاء الموعد", `هل تريدين إلغاء موعد ${fmtDate(a.date)} الساعة ${fmtTime(a.time)}؟`, "إلغاء الموعد", true))) return;
   try {
     await updateDoc(P.colDoc("appointments", a.id), { status: "cancelled" });
     await sendMsg(`ألغيت موعدي يوم ${fmtDate(a.date)} الساعة ${fmtTime(a.time)}.`);
-    toast("انلغى الموعد");
+    toast("أُلغي الموعد");
     render();
   } catch (e) { toast(errMsg(e), true); }
 }
@@ -214,14 +214,14 @@ async function meds() {
     <section class="card">${act.length ? `<ul class="plain">${act.map((m) => `<li class="req"><b>${esc(m.drug)}</b> ${esc(m.dose || "")}
       ${m.times ? `<div>⏰ ${esc(m.times.split(/[,،\s]+/).filter(Boolean).map(fmtTime).join(" · "))}</div>` : ""}
       ${m.note ? `<div class="muted">${esc(m.note)}</div>` : ""}
-      <div class="muted small">${m.endDate ? `لغاية ${esc(fmtDate(m.endDate, false))}` : "مستمر"}</div></li>`).join("")}</ul>` : empty("ما في أدوية حالية")}</section>
+      <div class="muted small">${m.endDate ? `لغاية ${esc(fmtDate(m.endDate, false))}` : "مستمر"}</div></li>`).join("")}</ul>` : empty("لا توجد أدوية حالية")}</section>
     <section class="card stack"><h3>التذكير</h3>
-      ${perm === "granted" ? `<p class="muted">التذكير شغال طالما التطبيق مفتوح أو بالخلفية.</p>`
-        : perm === "unsupported" ? `<p class="muted">جهازك ما بيدعم الإشعارات من المتصفح. تابعي الأوقات من هون.</p>`
+      ${perm === "granted" ? `<p class="muted">يعمل التذكير ما دام التطبيق مفتوحاً أو في الخلفية.</p>`
+        : perm === "unsupported" ? `<p class="muted">جهازك لا يدعم الإشعارات من المتصفح. تابعي الأوقات من هنا.</p>`
         : `<button class="btn primary en">تفعيل تذكير الأدوية</button>`}
     </section>
-    <section class="card"><h3>كل الوصفات</h3>${rxs.length ? rxs.map((r) => `<details><summary>${esc(fmtDate(r.date, false))}</summary><ol class="rx-items">${(r.items || []).map((it) => `<li><b>${esc(it.drug)}</b> ${esc(it.dose || "")} ${it.times ? `· ${esc(it.times)}` : ""} ${it.days ? `· ${esc(it.days)} يوم` : ""}</li>`).join("")}</ol></details>`).join("") : empty("ما في وصفات")}</section>`;
-  $(".en")?.addEventListener("click", async () => { const r = await Notification.requestPermission(); if (r === "granted") { scheduleDoseReminders(); toast("تفعّل التذكير"); } meds(); });
+    <section class="card"><h3>كل الوصفات</h3>${rxs.length ? rxs.map((r) => `<details><summary>${esc(fmtDate(r.date, false))}</summary><ol class="rx-items">${(r.items || []).map((it) => `<li><b>${esc(it.drug)}</b> ${esc(it.dose || "")} ${it.times ? `· ${esc(it.times)}` : ""} ${it.days ? `· ${esc(it.days)} يوم` : ""}</li>`).join("")}</ol></details>`).join("") : empty("لا توجد وصفات")}</section>`;
+  $(".en")?.addEventListener("click", async () => { const r = await Notification.requestPermission(); if (r === "granted") { scheduleDoseReminders(); toast("تم تفعيل التذكير"); } meds(); });
 }
 let doseTimers = [];
 async function scheduleDoseReminders() {
@@ -262,13 +262,13 @@ async function file() {
   const KIND = { echo: "إيكو", lab: "تحليل", other: "ملف" };
   main().innerHTML = `<h2 class="page-title">ملفي</h2>
     ${g ? pregCard(g, pregCalc(g)) : ""}
-    <section class="card"><h3>الزيارات</h3>${vs.length ? vs.map((v) => `<div class="visit-mini"><b>${esc(fmtDate(v.date, false))}</b>${v.diagnosis ? `<div>${esc(v.diagnosis)}</div>` : ""}${v.treatment ? `<div class="muted">${esc(v.treatment)}</div>` : ""}${v.publicNote ? `<div class="note-pub">${esc(v.publicNote)}</div>` : ""}</div>`).join("") : empty("ما في زيارات")}</section>
-    <section class="card"><h3>التحاليل</h3>${labs.length ? `<table class="tbl"><thead><tr><th>التاريخ</th><th>التحليل</th><th>النتيجة</th></tr></thead><tbody>${labs.map((l) => `<tr><td>${esc(l.date)}</td><td>${esc(l.test)}</td><td dir="ltr">${esc(l.value)} ${esc(l.unit || "")}</td></tr>`).join("")}</tbody></table>` : empty("ما في تحاليل")}</section>
+    <section class="card"><h3>الزيارات</h3>${vs.length ? vs.map((v) => `<div class="visit-mini"><b>${esc(fmtDate(v.date, false))}</b>${v.diagnosis ? `<div>${esc(v.diagnosis)}</div>` : ""}${v.treatment ? `<div class="muted">${esc(v.treatment)}</div>` : ""}${v.publicNote ? `<div class="note-pub">${esc(v.publicNote)}</div>` : ""}</div>`).join("") : empty("لا توجد زيارات")}</section>
+    <section class="card"><h3>التحاليل</h3>${labs.length ? `<table class="tbl"><thead><tr><th>التاريخ</th><th>التحليل</th><th>النتيجة</th></tr></thead><tbody>${labs.map((l) => `<tr><td>${esc(l.date)}</td><td>${esc(l.test)}</td><td dir="ltr">${esc(l.value)} ${esc(l.unit || "")}</td></tr>`).join("")}</tbody></table>` : empty("لا توجد تحاليل")}</section>
     <section class="card"><div class="row-between"><h3>الإيكو والملفات</h3><button class="btn small up">+ رفع تحليل</button></div>
-      <p class="muted small">إذا عملتي تحليل بمخبر برّا، صوّريه وارفعيه لتشوفه الدكتورة.</p>
-      ${fls.length ? `<div class="file-grid">${fls.map((f) => `<button class="file-tile" data-id="${f.id}">${f.data?.startsWith("data:image") ? `<img src="${f.data}" alt="">` : `<span class="pdf">PDF</span>`}<span>${esc(KIND[f.kind] || "ملف")} · ${esc(f.date || "")}</span></button>`).join("")}</div>` : empty("ما في ملفات")}</section>
+      <p class="muted small">إذا أجريتِ تحليلاً في مختبر خارجي، صوّريه وارفعيه لتطّلع عليه الطبيبة.</p>
+      ${fls.length ? `<div class="file-grid">${fls.map((f) => `<button class="file-tile" data-id="${f.id}">${f.data?.startsWith("data:image") ? `<img src="${f.data}" alt="">` : `<span class="pdf">PDF</span>`}<span>${esc(KIND[f.kind] || "ملف")} · ${esc(f.date || "")}</span></button>`).join("")}</div>` : empty("لا توجد ملفات")}</section>
     ${procs.length ? `<section class="card"><h3>الإجراءات</h3>${procs.map((x) => `<div class="visit-mini"><b>${esc(x.name)}</b> · ${esc(fmtDate(x.date, false))}<div>الجلسات: ${x.sessionsDone || 0} / ${x.sessionsTotal || 1}</div>${x.aftercare ? `<div class="pre muted">${esc(x.aftercare)}</div>` : ""}<div>${x.consentSignedAt ? `<span class="chip ok">الموافقة موقّعة</span>` : `<button class="btn small primary sign" data-id="${x.id}">توقيع الموافقة</button>`}</div></div>`).join("")}</section>` : ""}
-    <section class="card"><h3>الفواتير</h3>${pays.length ? `<table class="tbl"><thead><tr><th>التاريخ</th><th>الخدمة</th><th>المدفوع</th></tr></thead><tbody>${pays.sort((a, b) => b.date.localeCompare(a.date)).map((x) => `<tr><td>${esc(x.date)}</td><td>${esc(x.service || "")}</td><td>${esc(money(x.paid, cur))}</td></tr>`).join("")}</tbody></table>${due > 0 ? `<p class="alert">المتبقي عليكي: ${esc(money(due, cur))}</p>` : ""}` : empty("ما في فواتير")}</section>`;
+    <section class="card"><h3>الفواتير</h3>${pays.length ? `<table class="tbl"><thead><tr><th>التاريخ</th><th>الخدمة</th><th>المدفوع</th></tr></thead><tbody>${pays.sort((a, b) => b.date.localeCompare(a.date)).map((x) => `<tr><td>${esc(x.date)}</td><td>${esc(x.service || "")}</td><td>${esc(money(x.paid, cur))}</td></tr>`).join("")}</tbody></table>${due > 0 ? `<p class="alert">المبلغ المتبقي عليكِ: ${esc(money(due, cur))}</p>` : ""}` : empty("لا توجد فواتير")}</section>`;
   $(".up").onclick = uploadLab;
   $$(".sign").forEach((b) => b.onclick = () => signConsent(procs.find((x) => x.id === b.dataset.id)));
   $$(".file-tile").forEach((b) => b.onclick = () => {
@@ -282,12 +282,12 @@ async function uploadLab() {
   if (!r) return;
   const f = await pickFile("image/*,application/pdf"); if (!f) return;
   try {
-    toast("عم يرفع…");
+    toast("جارٍ الرفع…");
     const data = await compressImage(f);
     const p = me();
     const ref = await addDoc(P.sub(T.pid, "files"), { ...r, data, uploadedBy: "patient", createdAt: serverTimestamp() });
     await addDoc(P.col("inbox"), { patientId: p.id, patientName: p.name, label: r.kind === "echo" ? "إيكو" : "تحليل", fileId: ref.id, seen: false, at: serverTimestamp() });
-    toast("انرفع، والدكتورة رح تشوفه");
+    toast("تم الرفع، وستطّلع عليه الطبيبة");
     file();
   } catch (e) { toast(errMsg(e), true); }
 }
@@ -295,10 +295,10 @@ async function uploadLab() {
 async function signConsent(x) {
   const r = await modal(`موافقة: ${x.name}`, `<div class="consent-text pre">${esc(x.consentText || "أقرّ بأنني اطّلعت على طبيعة الإجراء وأوافق على إجرائه.")}</div>
     ${x.details ? `<p class="muted">${esc(x.details)}</p>` : ""}
-    <form class="stack">${field("اكتبي اسمك الكامل كتوقيع", "name", { required: true, value: me().name })}${field("قرأت النص وموافقة", "ok", { type: "checkbox" })}</form>`, {
+    <form class="stack">${field("اكتبي اسمك الكامل كتوقيع", "name", { required: true, value: me().name })}${field("قرأتُ النص وأوافق", "ok", { type: "checkbox" })}</form>`, {
     ok: "توقيع",
     onOk: async (f) => {
-      if (!f.ok) { toast("لازم توافقي على النص", true); return false; }
+      if (!f.ok) { toast("يجب الموافقة على النص", true); return false; }
       await updateDoc(P.subDoc(T.pid, "procedures", x.id), { consentSignedAt: serverTimestamp(), consentName: f.name });
       await audit("توقيع موافقة من التطبيق", x.name);
     }
@@ -321,7 +321,7 @@ async function msgs() {
   const un = onSnapshot(P.sub(T.pid, "messages"), (s) => {
     if (!document.body.contains(box)) return un();
     const arr = s.docs.map((d) => d.data()).sort((a, b) => (a.at?.seconds || 0) - (b.at?.seconds || 0));
-    box.innerHTML = arr.length ? arr.map((m) => `<div class="bubble ${m.from === "patient" ? "me" : ""}"><div>${esc(m.text)}</div><small>${esc(m.from === "clinic" ? (m.byName || "العيادة") : "")} ${esc(tsDate(m.at))}</small></div>`).join("") : empty("اكتبيلنا إذا عندك سؤال");
+    box.innerHTML = arr.length ? arr.map((m) => `<div class="bubble ${m.from === "patient" ? "me" : ""}"><div>${esc(m.text)}</div><small>${esc(m.from === "clinic" ? (m.byName || "العيادة") : "")} ${esc(tsDate(m.at))}</small></div>`).join("") : empty("اكتبي لنا إن كان لديكِ سؤال");
     box.scrollTop = box.scrollHeight;
   });
   S.unsub.push(un);
@@ -340,12 +340,12 @@ async function settings() {
       <li><label class="menu-check"><span>إخفاء التفاصيل الطبية</span><input type="checkbox" class="hs" ${T.me.hideSensitive ? "checked" : ""}></label></li>
       ${T.patients.length > 1 ? `<li><button class="sw"><span>تبديل الملف (${esc(me().name)})</span><span class="chev">‹</span></button></li>` : ""}
       <li><a href="#/learn"><span>معلومات صحية</span><span class="chev">‹</span></a></li>
-      <li><button class="cp"><span>تغيير كلمة السر</span><span class="chev">‹</span></button></li>
+      <li><button class="cp"><span>تغيير كلمة المرور</span><span class="chev">‹</span></button></li>
       <li><button class="out"><span>تسجيل الخروج</span></button></li>
     </ul>
-    <p class="muted small">مفيد إذا الموبايل مشترك: بتضل التفاصيل مخفية لحد ما تضغطي «إظهار».</p>`;
+    <p class="muted small">مفيد إذا كان الجوال مشتركاً: تبقى التفاصيل مخفية حتى تضغطي «إظهار».</p>`;
   $(".hs").onchange = async (e) => {
-    try { await updateDoc(P.user(S.user.uid), { hideSensitive: e.target.checked }); T.me.hideSensitive = e.target.checked; T._revealed = false; toast("انحفظ"); }
+    try { await updateDoc(P.user(S.user.uid), { hideSensitive: e.target.checked }); T.me.hideSensitive = e.target.checked; T._revealed = false; toast("تم الحفظ"); }
     catch (err) { toast(errMsg(err), true); }
   };
   $(".sw")?.addEventListener("click", () => { sessionStorage.removeItem("pid"); T.pid = null; choose(); });
@@ -355,17 +355,17 @@ async function settings() {
 
 // ---------- مقالات ----------
 const ARTICLES = [
-  ["علامات لازم تراجعي فيها الدكتورة فوراً أثناء الحمل", ["نزيف مهبلي بأي كمية.", "ألم بطن شديد أو مستمر.", "صداع قوي مع تشوش بالرؤية أو تورم مفاجئ بالوجه والإيدين.", "نقص واضح بحركة الجنين بعد الأسبوع 28.", "تسرب مي من المهبل.", "حرارة عالية أو قشعريرة.", "تقيؤ شديد ما بيوقف."]],
-  ["تغذية الحامل", ["نوّعي بالأكل: خضار، فواكه، بروتين، حبوب كاملة، وألبان مبسترة.", "خففي الكافيين، وابعدي عن اللحوم والبيض غير المطبوخين منيح والأجبان غير المبسترة.", "اشربي مي بكمية كافية خلال النهار.", "الفيتامينات والحديد وحمض الفوليك حسب وصفة الدكتورة."]],
-  ["الثلث الأول (لحد الأسبوع 13)", ["الغثيان والتعب شي شائع، وجبات صغيرة ومتكررة بتساعد.", "حمض الفوليك مهم لنمو الجهاز العصبي للجنين.", "لا تاخدي أي دواء أو أعشاب بدون ما تسألي الدكتورة."]],
-  ["الثلث التاني (الأسابيع 14–27)", ["غالباً الطاقة بترجع والغثيان بيخف.", "ممكن تبلشي تحسي بحركة الجنين.", "المشي والحركة الخفيفة مفيدين إلا إذا الدكتورة قالت غير هيك."]],
-  ["الثلث الأخير (من الأسبوع 28)", ["انتبهي لحركة الجنين كل يوم.", "جهزي شنطة الولادة وأوراقك.", "النوم على الجنب أريح غالباً."]],
-  ["بعد الولادة", ["النزيف بيخف تدريجياً خلال أسابيع، إذا زاد فجأة أو صار في ريحة أو حرارة راجعي.", "خدي راحة وكلي منيح، وخلي حدا يساعدك.", "الحزن أو القلق الشديد بعد الولادة شي بيصير، احكي مع الدكتورة إذا طوّل."]],
-  ["الرضاعة الطبيعية", ["بلشي الرضاعة بأقرب وقت بعد الولادة.", "الرضاعة حسب الطلب.", "إذا في ألم شديد أو احمرار أو حرارة بالصدر راجعي."]],
-  ["مسحة عنق الرحم", ["فحص بسيط بيكشف تغيرات خلايا عنق الرحم بكير.", "الدكتورة بتحددلك كل قديش لازم تعمليه.", "التطبيق بيذكرك بموعدها إذا مسجل بملفك."]],
+  ["علامات تستدعي مراجعة الطبيبة فوراً أثناء الحمل", ["نزيف مهبلي بأي كمية.", "ألم بطن شديد أو مستمر.", "صداع شديد مع تشوش في الرؤية أو تورم مفاجئ في الوجه واليدين.", "نقص واضح في حركة الجنين بعد الأسبوع 28.", "تسرب ماء من المهبل.", "حرارة عالية أو قشعريرة.", "تقيؤ شديد لا يتوقف."]],
+  ["تغذية الحامل", ["نوّعي غذاءك: خضار، فواكه، بروتين، حبوب كاملة، وألبان مبسترة.", "قلّلي الكافيين، وتجنّبي اللحوم والبيض غير المطهوّة جيداً والأجبان غير المبسترة.", "اشربي كمية كافية من الماء خلال النهار.", "الفيتامينات والحديد وحمض الفوليك وفق وصفة الطبيبة."]],
+  ["الثلث الأول (حتى الأسبوع 13)", ["الغثيان والتعب شائعان، وتساعد الوجبات الصغيرة المتكررة.", "حمض الفوليك مهم لنمو الجهاز العصبي للجنين.", "لا تتناولي أي دواء أو أعشاب دون استشارة الطبيبة."]],
+  ["الثلث الثاني (الأسابيع 14–27)", ["غالباً تعود الطاقة ويخف الغثيان.", "قد تبدئين بالشعور بحركة الجنين.", "المشي والنشاط الخفيف مفيدان ما لم توصِ الطبيبة بغير ذلك."]],
+  ["الثلث الأخير (من الأسبوع 28)", ["راقبي حركة الجنين يومياً.", "جهّزي حقيبة الولادة وأوراقك.", "النوم على الجانب أكثر راحة غالباً."]],
+  ["بعد الولادة", ["يخف النزيف تدريجياً خلال أسابيع، وإذا زاد فجأة أو ظهرت رائحة أو حرارة فراجعي الطبيبة.", "خذي قسطاً من الراحة وتغذّي جيداً، واطلبي المساعدة من المقربين.", "قد يحدث حزن أو قلق شديد بعد الولادة، فتحدثي مع الطبيبة إذا استمر."]],
+  ["الرضاعة الطبيعية", ["ابدئي الرضاعة في أقرب وقت بعد الولادة.", "الرضاعة حسب الطلب.", "راجعي الطبيبة عند وجود ألم شديد أو احمرار أو حرارة في الثدي."]],
+  ["مسحة عنق الرحم", ["فحص بسيط يكشف تغيرات خلايا عنق الرحم مبكراً.", "تحدد لكِ الطبيبة كم مرة يجب إجراؤه.", "يذكّرك التطبيق بموعدها إذا كان مسجلاً في ملفك."]],
 ];
 function learn() {
   main().innerHTML = `<h2 class="page-title">معلومات صحية</h2>
     ${ARTICLES.map(([t, items]) => `<details class="card article"><summary><b>${esc(t)}</b></summary><ul class="plain dots">${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul></details>`).join("")}
-    <p class="muted small">هالمعلومات عامة وما بتغني عن استشارة الدكتورة.</p>`;
+    <p class="muted small">هذه معلومات عامة ولا تغني عن استشارة الطبيبة.</p>`;
 }

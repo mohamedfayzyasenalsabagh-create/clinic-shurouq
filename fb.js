@@ -63,7 +63,7 @@ export function genPassword() {
   return String(100000 + (a[0] % 900000));
 }
 
-// حساب ثانوي لإنشاء حسابات جديدة بدون ما تطلع الدكتورة من حسابها
+// حساب ثانوي لإنشاء حسابات جديدة بدون ما تطلع الطبيبة من حسابها
 let secondary = null;
 async function secondaryAuth() {
   if (!secondary) {
@@ -87,7 +87,7 @@ async function createAuthAt(phone, kind, password, startVer = 1) {
       if (e.code !== "auth/email-already-in-use") throw e;
     }
   }
-  throw new Error("وصل هذا الرقم للحد الأقصى من إعادة التعيين. تواصل مع الدعم.");
+  throw new Error("بلغ هذا الرقم الحد الأقصى لإعادة التعيين. يرجى التواصل مع الدعم.");
 }
 
 // ---------- الدخول ----------
@@ -97,7 +97,7 @@ export async function login(idText, password, kind) {
     return (await signInWithEmailAndPassword(auth, id, password)).user;
   }
   const phone = normPhone(id);
-  if (phone.length < 9) throw new Error("رقم الموبايل غير صحيح");
+  if (phone.length < 9) throw new Error("رقم الجوال غير صحيح");
   let lastErr = null;
   for (let v = 1; v <= MAX_VER; v++) {
     try {
@@ -168,7 +168,7 @@ export function defaultServices() {
 // ---------- المريضات ----------
 export async function registerPatient(data) {
   const phone = normPhone(data.phone);
-  if (phone.length < 9) throw new Error("رقم الموبايل غير صحيح");
+  if (phone.length < 9) throw new Error("رقم الجوال غير صحيح");
   const pRef = doc(P.patients());
   const pid = pRef.id;
   const phRef = P.phone(phone);
@@ -198,10 +198,10 @@ export async function registerPatient(data) {
   return { pid, tempPassword, shared, phone };
 }
 
-// كلمة سر جديدة للمريضة: بينعمل حساب بنسخة جديدة والقديم بيتوقف
+// كلمة مرور جديدة للمريضة: بينعمل حساب بنسخة جديدة والقديم بيتوقف
 export async function resetPatientPassword(phone) {
   const ph = await getDoc(P.phone(phone));
-  if (!ph.exists() || !ph.data().patientUid) throw new Error("ما في حساب لهذا الرقم");
+  if (!ph.exists() || !ph.data().patientUid) throw new Error("لا يوجد حساب لهذا الرقم");
   const oldUid = ph.data().patientUid;
   const old = await getDoc(P.user(oldUid));
   const temp = genPassword();
@@ -222,11 +222,11 @@ export async function resetPatientPassword(phone) {
 // ---------- الموظفين ----------
 export async function createStaff(name, phoneRaw) {
   const phone = normPhone(phoneRaw);
-  if (phone.length < 9) throw new Error("رقم الموبايل غير صحيح");
+  if (phone.length < 9) throw new Error("رقم الجوال غير صحيح");
   const ph = await getDoc(P.phone(phone));
   if (ph.exists() && ph.data().staffUid) {
     const u = await getDoc(P.user(ph.data().staffUid));
-    if (u.exists() && u.data().active) throw new Error("في موظف مسجل بهاد الرقم");
+    if (u.exists() && u.data().active) throw new Error("يوجد موظف مسجّل بهذا الرقم");
   }
   const temp = genPassword();
   const start = ph.exists() && ph.data().staffVer ? ph.data().staffVer + 1 : 1;

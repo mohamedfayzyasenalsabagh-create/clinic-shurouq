@@ -45,14 +45,14 @@ export function toast(msg, bad = false) {
 
 export function errMsg(e) {
   const c = e?.code || "";
-  if (c.includes("invalid-credential") || c.includes("wrong-password") || c.includes("user-not-found")) return "الرقم أو كلمة السر غير صحيحة";
-  if (c.includes("too-many-requests")) return "محاولات كتيرة، جرّب بعد شوي";
-  if (c.includes("network")) return "ما في اتصال بالإنترنت";
-  if (c.includes("permission-denied")) return "ما عندك صلاحية لهاد الإجراء";
-  if (c.includes("weak-password")) return "كلمة السر لازم تكون 6 أحرف أو أكتر";
+  if (c.includes("invalid-credential") || c.includes("wrong-password") || c.includes("user-not-found")) return "الرقم أو كلمة المرور غير صحيحة";
+  if (c.includes("too-many-requests")) return "محاولات كثيرة، يرجى المحاولة بعد قليل";
+  if (c.includes("network")) return "لا يوجد اتصال بالإنترنت";
+  if (c.includes("permission-denied")) return "ليست لديك صلاحية لهذا الإجراء";
+  if (c.includes("weak-password")) return "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل";
   if (c.includes("email-already-in-use")) return "الحساب موجود مسبقاً";
-  if (c.includes("invalid-email")) return "الإيميل غير صحيح";
-  return e?.message || "صار خطأ، جرّب مرة تانية";
+  if (c.includes("invalid-email")) return "البريد الإلكتروني غير صحيح";
+  return e?.message || "حدث خطأ، يرجى المحاولة مجدداً";
 }
 
 // ---------- نوافذ ----------
@@ -93,7 +93,7 @@ export function modal(title, bodyHtml, { ok = "حفظ", cancel = "إلغاء", o
 }
 export const confirmBox = (title, text, ok = "تأكيد", danger = false) =>
   modal(title, `<p>${esc(text)}</p>`, { ok, danger });
-export function info(title, html) { return modal(title, html, { ok: "تمام", cancel: null }); }
+export function info(title, html) { return modal(title, html, { ok: "حسناً", cancel: null }); }
 
 export function formData(form) {
   const o = {};
@@ -140,7 +140,7 @@ export function fileToDataUrl(file) {
 export async function compressImage(file, maxSide = 1400, quality = 0.72) {
   if (file.type === "application/pdf") {
     const d = await fileToDataUrl(file);
-    if (d.length > 950000) throw new Error("ملف الـPDF كبير، صوّره كصورة بدلاً منه");
+    if (d.length > 950000) throw new Error("ملف PDF كبير جداً، يرجى تصويره كصورة بدلاً منه");
     return d;
   }
   const url = await fileToDataUrl(file);
@@ -157,7 +157,7 @@ export async function compressImage(file, maxSide = 1400, quality = 0.72) {
     if (out.length < 900000) return out;
     q -= 0.1; side = Math.round(side * 0.8);
   }
-  throw new Error("الصورة كبيرة كتير");
+  throw new Error("الصورة كبيرة جداً");
 }
 
 // ---------- الشعار الافتراضي ----------

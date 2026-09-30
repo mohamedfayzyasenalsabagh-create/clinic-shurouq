@@ -20,8 +20,8 @@ function applyBrand(pub) {
 async function boot() {
   if (!configured) {
     root().innerHTML = `<div class="center-page"><div class="card narrow">
-      <h2>النظام بحاجة لإعدادات Firebase</h2>
-      <p>افتح ملف <b>config.js</b> والصق إعدادات مشروع Firebase حسب دليل التشغيل.</p></div></div>`;
+      <h2>يحتاج النظام إلى إعدادات Firebase</h2>
+      <p>افتح ملف <b>config.js</b> والصق إعدادات مشروع Firebase وفق دليل التشغيل.</p></div></div>`;
     return;
   }
   try { applyBrand(await one(P.pub())); } catch { applyBrand({}); }
@@ -42,10 +42,10 @@ async function onUser(user) {
     }
     let prof = null;
     try { prof = await one(P.user(user.uid)); } catch (e) { console.error(e); }
-    if (!prof) { await signOut(auth); return showLogin("ما لقينا الحساب"); }
+    if (!prof) { await signOut(auth); return showLogin("لم يُعثر على الحساب"); }
     if (!prof.active) {
       await signOut(auth);
-      return showLogin("هاد الحساب متوقف. إذا انعطيتك كلمة سر جديدة استخدميها.");
+      return showLogin("هذا الحساب موقوف. إذا حصلتِ على كلمة مرور جديدة فاستخدميها.");
     }
     S.profile = prof;
     setActor({ uid: user.uid, name: prof.name || prof.phone });
@@ -63,7 +63,7 @@ export async function route() {
     if (!prof.consentAt) return m.showConsent();
     return m.start();
   }
-  // الدكتورة والسكرتارية
+  // الطبيبة والسكرتارية
   S.unsub.push(onSnapshot(P.clinic(), (s) => {
     S.clinic = s.data() || {};
     applyBrand({ ...S.pub, ...pickBrand(S.clinic) });
@@ -93,11 +93,11 @@ function showLogin(msg = "") {
           <button role="tab" class="${kind === "s" ? "on" : ""}" data-k="s" aria-selected="${kind === "s"}">فريق العيادة</button>
         </div>
         <form id="lf" class="stack">
-          ${field(kind === "p" ? "رقم الموبايل" : "رقم الموبايل أو الإيميل", "id", { required: true, attrs: `inputmode="${kind === "p" ? "tel" : "text"}" autocomplete="username" dir="ltr"`, placeholder: "09xxxxxxxx" })}
-          ${field("كلمة السر", "pw", { type: "password", required: true, attrs: 'autocomplete="current-password" dir="ltr"' })}
+          ${field(kind === "p" ? "رقم الجوال" : "رقم الجوال أو البريد الإلكتروني", "id", { required: true, attrs: `inputmode="${kind === "p" ? "tel" : "text"}" autocomplete="username" dir="ltr"`, placeholder: "09xxxxxxxx" })}
+          ${field("كلمة المرور", "pw", { type: "password", required: true, attrs: 'autocomplete="current-password" dir="ltr"' })}
           ${msg ? `<div class="alert">${esc(msg)}</div>` : ""}
           <button class="btn primary block" type="submit">دخول</button>
-          <button class="link-btn forgot" type="button">نسيت كلمة السر؟</button>
+          <button class="link-btn forgot" type="button">نسيت كلمة المرور؟</button>
         </form>
       </div>
       <p class="muted small">${esc(S.pub.address || "")} ${S.pub.phone ? `· <span dir="ltr">${esc(S.pub.phone)}</span>` : ""}</p>
@@ -106,20 +106,20 @@ function showLogin(msg = "") {
     $("#lf").onsubmit = async (e) => {
       e.preventDefault();
       const btn = e.target.querySelector("[type=submit]");
-      btn.disabled = true; btn.textContent = "لحظة…";
+      btn.disabled = true; btn.textContent = "يرجى الانتظار…";
       try { await login(e.target.id.value, e.target.pw.value, kind); }
       catch (err) { msg = errMsg(err); render(); }
     };
     $(".forgot").onclick = async () => {
       const v = $("#lf").id.value.trim();
       if (kind === "s" && v.includes("@")) {
-        try { await sendPasswordResetEmail(auth, v); toast("انبعت رابط تغيير كلمة السر على الإيميل"); }
+        try { await sendPasswordResetEmail(auth, v); toast("أُرسل رابط تغيير كلمة المرور إلى بريدك الإلكتروني"); }
         catch (e) { toast(errMsg(e), true); }
         return;
       }
-      info("نسيت كلمة السر", kind === "p"
-        ? `<p>تواصلي مع العيادة وبيعطوكي كلمة سر جديدة.</p>${S.pub.phone ? `<p><a class="btn primary" href="tel:${esc(S.pub.phone)}">اتصال بالعيادة</a></p>` : ""}`
-        : `<p>السكرتارية: الدكتورة بتعطيك كلمة سر جديدة من قسم الموظفين.</p><p>الدكتورة: إذا سجلتي إيميل وقت الإعداد، اكتبيه بخانة الدخول واضغطي "نسيت كلمة السر" بيوصلك رابط.</p>`);
+      info("نسيت كلمة المرور", kind === "p"
+        ? `<p>تواصلي مع العيادة للحصول على كلمة مرور جديدة.</p>${S.pub.phone ? `<p><a class="btn primary" href="tel:${esc(S.pub.phone)}">اتصال بالعيادة</a></p>` : ""}`
+        : `<p>السكرتارية: تمنحكِ الطبيبة كلمة مرور جديدة من قسم الموظفين.</p><p>الطبيبة: إذا سجّلتِ بريداً إلكترونياً عند الإعداد، فاكتبيه في خانة الدخول واضغطي "نسيت كلمة المرور" ليصلك رابط التغيير.</p>`);
     };
   };
   render();
@@ -128,27 +128,27 @@ function showLogin(msg = "") {
 // ---------- الإعداد الأول (مرة وحدة بس) ----------
 function showSetup() {
   root().innerHTML = `<div class="center-page">
-    <div class="brand-block">${logoHtml(null, 88)}<h1>إعداد العيادة لأول مرة</h1><p>هاد الإعداد بيصير مرة وحدة، ومنه بينعمل حساب الدكتورة (الأدمن).</p></div>
+    <div class="brand-block">${logoHtml(null, 88)}<h1>إعداد العيادة لأول مرة</h1><p>يتم هذا الإعداد مرة واحدة فقط، ومنه يُنشأ حساب الطبيبة (المسؤولة).</p></div>
     <form id="sf" class="card narrow stack">
       <h3>بيانات العيادة</h3>
       ${field("اسم العيادة", "clinicName", { value: "عيادة د. شروق صليبي", required: true })}
-      ${field("اسم الدكتورة", "doctorName", { value: "شروق محمد ساطع صليبي", required: true })}
+      ${field("اسم الطبيبة", "doctorName", { value: "شروق محمد ساطع صليبي", required: true })}
       ${field("اللقب", "title", { value: "أخصائية توليد وتجميل نسائي (بورد أميركي)", required: true })}
       ${field("العنوان", "address", { value: "باب مصلى، باتجاه مشفى المجتهد، بعد صيدلية بيور كير" })}
       ${field("هاتف العيادة", "clinicPhone", { value: "0932793051", attrs: 'dir="ltr" inputmode="tel"' })}
-      <h3>حساب الدكتورة</h3>
-      ${field("رقم موبايل الدكتورة (للدخول)", "phone", { required: true, attrs: 'dir="ltr" inputmode="tel"', placeholder: "09xxxxxxxx" })}
-      ${field("إيميل للطوارئ (اختياري)", "email", { type: "email", attrs: 'dir="ltr"', hint: "إذا كتبتيه، الدخول بيصير بالإيميل وبتقدري تسترجعي كلمة السر إذا نسيتيها." })}
-      ${field("كلمة السر", "password", { type: "password", required: true, attrs: 'minlength="6" dir="ltr" autocomplete="new-password"' })}
-      ${field("تأكيد كلمة السر", "password2", { type: "password", required: true, attrs: 'minlength="6" dir="ltr" autocomplete="new-password"' })}
+      <h3>حساب الطبيبة</h3>
+      ${field("رقم جوال الطبيبة (لتسجيل الدخول)", "phone", { required: true, attrs: 'dir="ltr" inputmode="tel"', placeholder: "09xxxxxxxx" })}
+      ${field("البريد الإلكتروني للطوارئ (اختياري)", "email", { type: "email", attrs: 'dir="ltr"', hint: "عند إدخاله يصبح الدخول بالبريد الإلكتروني، ويمكنكِ استعادة كلمة المرور إن نسيتِها." })}
+      ${field("كلمة المرور", "password", { type: "password", required: true, attrs: 'minlength="6" dir="ltr" autocomplete="new-password"' })}
+      ${field("تأكيد كلمة المرور", "password2", { type: "password", required: true, attrs: 'minlength="6" dir="ltr" autocomplete="new-password"' })}
       <button class="btn primary block" type="submit">إنشاء العيادة</button>
     </form></div>`;
   $("#sf").onsubmit = async (e) => {
     e.preventDefault();
     const f = Object.fromEntries(new FormData(e.target));
-    if (f.password !== f.password2) return toast("كلمتي السر مو متطابقتين", true);
+    if (f.password !== f.password2) return toast("كلمتا المرور غير متطابقتين", true);
     const btn = e.target.querySelector("[type=submit]");
-    btn.disabled = true; btn.textContent = "عم ينعمل الإعداد…";
+    btn.disabled = true; btn.textContent = "جارٍ الإعداد…";
     setupInProgress = true;
     try {
       await firstSetup(f);
@@ -164,12 +164,12 @@ function showSetup() {
   };
 }
 
-// ---------- تغيير كلمة السر ----------
+// ---------- تغيير كلمة المرور ----------
 export function showChangePassword(forced = false) {
   root().innerHTML = `<div class="center-page"><form id="cp" class="card narrow stack">
-    <h2>${forced ? "أهلاً فيكي! اختاري كلمة سر جديدة" : "تغيير كلمة السر"}</h2>
-    <p class="muted">${forced ? "كلمة السر المؤقتة يلي انعطت إلك لازم تتغير قبل ما تكملي." : ""}</p>
-    ${field("كلمة السر الجديدة", "p1", { type: "password", required: true, attrs: 'minlength="6" dir="ltr" autocomplete="new-password"' })}
+    <h2>${forced ? "مرحباً بكِ! اختاري كلمة مرور جديدة" : "تغيير كلمة المرور"}</h2>
+    <p class="muted">${forced ? "يجب تغيير كلمة المرور المؤقتة التي حصلتِ عليها قبل المتابعة." : ""}</p>
+    ${field("كلمة المرور الجديدة", "p1", { type: "password", required: true, attrs: 'minlength="6" dir="ltr" autocomplete="new-password"' })}
     ${field("تأكيدها", "p2", { type: "password", required: true, attrs: 'minlength="6" dir="ltr" autocomplete="new-password"' })}
     <button class="btn primary block" type="submit">حفظ</button>
     ${forced ? `<button class="link-btn out" type="button">خروج</button>` : `<button class="link-btn back" type="button">رجوع</button>`}
@@ -177,16 +177,16 @@ export function showChangePassword(forced = false) {
   $("#cp").onsubmit = async (e) => {
     e.preventDefault();
     const { p1, p2 } = e.target;
-    if (p1.value !== p2.value) return toast("كلمتي السر مو متطابقتين", true);
+    if (p1.value !== p2.value) return toast("كلمتا المرور غير متطابقتين", true);
     try {
       await updatePassword(auth.currentUser, p1.value);
       await updateDoc(P.user(auth.currentUser.uid), { mustChangePassword: false });
       S.profile.mustChangePassword = false;
-      toast("تم تغيير كلمة السر");
+      toast("تم تغيير كلمة المرور");
       route();
     } catch (err) {
       if (err.code === "auth/requires-recent-login") {
-        toast("لأسباب أمنية اطلعي وادخلي من جديد، وبعدين غيّري كلمة السر", true);
+        toast("لأسباب أمنية، سجّلي الخروج ثم الدخول مجدداً، ثم غيّري كلمة المرور", true);
       } else toast(errMsg(err), true);
     }
   };

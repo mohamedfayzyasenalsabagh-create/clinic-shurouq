@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
             public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) {
                 if (r.isForMainFrame()) {
                     v.loadData("<html dir='rtl'><body style='font-family:sans-serif;text-align:center;padding:40px;color:#2A1F33;background:#F7F3FA'>"
-                        + "<h2 style='color:#6B3FA0'>ما في اتصال بالإنترنت</h2><p>تأكد من الاتصال وجرّب مرة تانية.</p>"
+                        + "<h2 style='color:#6B3FA0'>لا يوجد اتصال بالإنترنت</h2><p>تحقق من الاتصال وحاول مجدداً.</p>"
                         + "<button style='padding:12px 24px;border-radius:12px;border:0;background:#6B3FA0;color:#fff;font-size:16px' onclick=\"location.href='" + HOME + "'\">إعادة المحاولة</button></body></html>",
                         "text/html; charset=utf-8", "UTF-8");
                 }
@@ -88,7 +88,7 @@ public class MainActivity extends Activity {
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, u));
         } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, "ما في تطبيق بيفتح هاد الرابط", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "لا يوجد تطبيق لفتح هذا الرابط", Toast.LENGTH_SHORT).show();
         }
     }
 
