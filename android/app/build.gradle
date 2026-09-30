@@ -1,0 +1,24 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'com.shurouq.clinic'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.shurouq.clinic'
+        minSdk 24
+        targetSdk 34
+        versionCode Integer.parseInt(System.getenv('VERSION_CODE') ?: '1')
+        versionName '1.0.' + (System.getenv('VERSION_CODE') ?: '1')
+    }
+    signingConfigs {
+        release {
+            storeFile file('../clinic.keystore')
+            storePassword 'shurouqclinic'
+            keyAlias 'clinic'
+            keyPassword 'shurouqclinic'
+        }
+    }
+    buildTypes {
+        release { minifyEnabled false; signingConfig signingConfigs.release }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
