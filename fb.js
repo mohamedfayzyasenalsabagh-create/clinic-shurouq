@@ -159,7 +159,7 @@ export function defaultServices() {
   return [
     { id: "kashf", name: "معاينة", price: 0, duration: 20, kind: "general" },
     { id: "review", name: "مراجعة", price: 0, duration: 15, kind: "general" },
-    { id: "echo", name: "تصوير صوتي", price: 0, duration: 20, kind: "general" },
+    { id: "echo", name: "إيكو", price: 0, duration: 20, kind: "general" },
     { id: "preg", name: "متابعة حمل", price: 0, duration: 20, kind: "general" },
     { id: "cosm", name: "استشارة تجميلية", price: 0, duration: 30, kind: "cosmetic" },
   ];

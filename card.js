@@ -309,12 +309,12 @@ async function preg(p) {
       <table class="kv">
         <tr><th>أول يوم من آخر دورة</th><td>${esc(fmtDate(g.lmp, false))}</td></tr>
         <tr><th>الولادة المتوقعة (حسب الدورة)</th><td>${esc(fmtDate(g.eddLmp, false))}</td></tr>
-        ${g.eddUs ? `<tr><th>الولادة المتوقعة (مصححة بالتصوير الصوتي)</th><td><b>${esc(fmtDate(g.eddUs, false))}</b></td></tr>` : ""}
+        ${g.eddUs ? `<tr><th>الولادة المتوقعة (مصححة بالإيكو)</th><td><b>${esc(fmtDate(g.eddUs, false))}</b></td></tr>` : ""}
         <tr><th>باقي</th><td>${c.left >= 0 ? `${c.left} يوم` : `تجاوزت الموعد بـ ${-c.left} يوم`}</td></tr>
         ${g.riskNote ? `<tr><th>سبب الخطورة</th><td>${esc(g.riskNote)}</td></tr>` : ""}
       </table>
       <div class="row gap wrap">
-        <button class="btn small us">تصحيح بالتصوير الصوتي</button>
+        <button class="btn small us">تصحيح بالإيكو</button>
         <button class="btn small sched">جدول زيارات الحمل</button>
         <button class="btn small rep">تقرير حمل</button>
         <button class="btn small end">تسجيل الولادة / إنهاء</button>
@@ -344,7 +344,7 @@ async function preg(p) {
       <div class="grid2">${field("الوزن (كغ)", "weight", { type: "number", attrs: 'step="0.1" min="0"' })}${field("الضغط", "bp", { placeholder: "120/80", attrs: 'dir="ltr"' })}</div>
       <div class="grid2">${field("نبض الجنين", "fhr", { type: "number", attrs: 'min="0"' })}${field("ارتفاع قاع الرحم (سم)", "fundal", { type: "number", attrs: 'step="0.5" min="0"' })}</div>
       ${field("وزن الجنين التقديري (غ)", "efw", { type: "number", attrs: 'min="0"' })}
-      ${field("ملاحظات التصوير الصوتي / الزيارة", "note", { type: "textarea" })}</form>`, {
+      ${field("ملاحظات الإيكو / الزيارة", "note", { type: "textarea" })}</form>`, {
       onOk: async (f) => {
         await updateDoc(gRef, { measurements: [...(g.measurements || []), f] });
         await audit("قياس حمل", p.name);
@@ -353,9 +353,9 @@ async function preg(p) {
     });
   };
   $(".us").onclick = async () => {
-    await modal("تصحيح موعد الولادة بالتصوير الصوتي", `<form class="stack">
-      ${field("تاريخ التصوير الصوتي", "usDate", { type: "date", value: ymd(), required: true })}
-      <div class="grid2">${field("عمر الحمل بالتصوير الصوتي (أسابيع)", "w", { type: "number", required: true, attrs: 'min="4" max="42"' })}${field("وأيام", "d", { type: "number", value: 0, attrs: 'min="0" max="6"' })}</div></form>`, {
+    await modal("تصحيح موعد الولادة بالإيكو", `<form class="stack">
+      ${field("تاريخ الإيكو", "usDate", { type: "date", value: ymd(), required: true })}
+      <div class="grid2">${field("عمر الحمل بالإيكو (أسابيع)", "w", { type: "number", required: true, attrs: 'min="4" max="42"' })}${field("وأيام", "d", { type: "number", value: 0, attrs: 'min="0" max="6"' })}</div></form>`, {
       onOk: async (f) => {
         const ga = f.w * 7 + (f.d || 0);
         const eddUs = addDays(f.usDate, 280 - ga);
@@ -397,7 +397,7 @@ async function preg(p) {
 async function newPregModal(p) {
   await modal("بدء متابعة حمل", `<form class="stack">
     ${field("أول يوم من آخر دورة", "lmp", { type: "date", required: true })}
-    <p class="muted small">يحسب النظام عمر الحمل وموعد الولادة تلقائياً، ويمكنكِ تصحيحه لاحقاً وفق أول تصوير صوتي.</p></form>`, {
+    <p class="muted small">يحسب النظام عمر الحمل وموعد الولادة تلقائياً، ويمكنكِ تصحيحه لاحقاً وفق أول إيكو.</p></form>`, {
     ok: "بدء",
     onOk: async (f) => {
       const g = { clinicId: C, patientId: p.id, lmp: f.lmp, eddLmp: addDays(f.lmp, 280), eddUs: null, status: "active", highRisk: false, riskNote: "", measurements: [], createdAt: serverTimestamp() };
@@ -509,8 +509,8 @@ async function gyn(p) {
     <section class="card stack"><h3>بروتوكول التنشيط</h3>
       <textarea class="proto" rows="3" aria-label="البروتوكول" placeholder="الأدوية، الجرعات، مواعيد المراقبة…">${esc(fr.protocol || "")}</textarea>
       <button class="btn small savep">حفظ البروتوكول</button>
-      <div class="row-between"><h4>مواعيد الحُقن</h4><button class="btn small addi">+ حقنة</button></div>
-      ${(fr.injections || []).length ? `<ul class="plain">${fr.injections.map((x, i) => `<li class="row-between"><label class="check"><input type="checkbox" data-i="${i}" class="inj" ${x.done ? "checked" : ""}><span>${esc(x.date)} ${esc(x.time || "")} · <b>${esc(x.drug)}</b> ${esc(x.dose || "")}</span></label></li>`).join("")}</ul>` : empty("لا توجد حقن مجدولة")}
+      <div class="row-between"><h4>مواعيد الإبر</h4><button class="btn small addi">+ إبرة</button></div>
+      ${(fr.injections || []).length ? `<ul class="plain">${fr.injections.map((x, i) => `<li class="row-between"><label class="check"><input type="checkbox" data-i="${i}" class="inj" ${x.done ? "checked" : ""}><span>${esc(x.date)} ${esc(x.time || "")} · <b>${esc(x.drug)}</b> ${esc(x.dose || "")}</span></label></li>`).join("")}</ul>` : empty("لا توجد إبر مجدولة")}
     </section>`;
   const fRef = P.subDoc(p.id, "fertility", "main");
   const saveF = async (patch) => { await setDoc(fRef, { ...fr, ...patch, updatedAt: serverTimestamp() }); refresh(); };
@@ -521,7 +521,7 @@ async function gyn(p) {
   };
   $(".savep").onclick = () => saveF({ protocol: $(".proto").value });
   $(".addi").onclick = async () => {
-    const r = await modal("حقنة", `<form class="stack">${field("التاريخ", "date", { type: "date", value: ymd(), required: true })}${field("الوقت", "time", { type: "time" })}${field("الدواء", "drug", { required: true })}${field("الجرعة", "dose")}</form>`);
+    const r = await modal("إبرة", `<form class="stack">${field("التاريخ", "date", { type: "date", value: ymd(), required: true })}${field("الوقت", "time", { type: "time" })}${field("الدواء", "drug", { required: true })}${field("الجرعة", "dose")}</form>`);
     if (r) saveF({ injections: [...(fr.injections || []), { ...r, done: false }].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)) });
   };
   $$(".inj").forEach((c) => c.onchange = () => { const inj = fr.injections.slice(); inj[c.dataset.i] = { ...inj[c.dataset.i], done: c.checked }; saveF({ injections: inj }); });
@@ -612,14 +612,14 @@ async function files(p) {
   fls.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
   const unseen = await list(query(P.col("inbox"), where("patientId", "==", p.id), where("seen", "==", false)));
   for (const u of unseen) await updateDoc(P.colDoc("inbox", u.id), { seen: true });
-  const KIND = { echo: "تصوير صوتي", lab: "تحليل", other: "ملف" };
+  const KIND = { echo: "إيكو", lab: "تحليل", other: "ملف" };
   tabEl().innerHTML = `
     <section class="card"><div class="row-between"><h3>نتائج التحاليل</h3><button class="btn primary small addl">+ نتيجة</button></div>
       ${Object.keys(byTest).length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>التحليل</th><th>آخر قيمة</th><th>السابقة</th><th>التغير</th></tr></thead><tbody>
       ${Object.entries(byTest).map(([t, a]) => { const [n, o] = a; const dv = o && !isNaN(n.value) && !isNaN(o.value) ? (Number(n.value) - Number(o.value)).toFixed(1) : ""; return `<tr><td><b>${esc(t)}</b></td><td>${esc(n.value)} ${esc(n.unit || "")}<br><small class="muted">${esc(n.date)}</small></td><td>${o ? `${esc(o.value)}<br><small class="muted">${esc(o.date)}</small>` : "—"}</td><td dir="ltr">${dv ? (dv > 0 ? "▲ " : dv < 0 ? "▼ " : "") + esc(dv) : ""}</td></tr>`; }).join("")}
       </tbody></table></div>` : empty("لا توجد نتائج")}
     </section>
-    <section class="card"><div class="row-between"><h3>التصوير الصوتي والملفات</h3><button class="btn primary small addf">+ رفع</button></div>
+    <section class="card"><div class="row-between"><h3>الإيكو والملفات</h3><button class="btn primary small addf">+ رفع</button></div>
       ${fls.length ? `<div class="file-grid">${fls.map((f) => `<button class="file-tile" data-id="${f.id}">
         ${f.data?.startsWith("data:image") ? `<img src="${f.data}" alt="">` : `<span class="pdf">PDF</span>`}
         <span>${esc(KIND[f.kind] || "ملف")} · ${esc(f.date || "")}${f.uploadedBy === "patient" ? " · من المريضة" : ""}</span></button>`).join("")}</div>` : empty("لا توجد ملفات")}
@@ -635,7 +635,7 @@ async function files(p) {
     });
   };
   $(".addf").onclick = async () => {
-    const r = await modal("رفع ملف", `<form class="stack">${select("النوع", "kind", [["echo", "تصوير صوتي"], ["lab", "تحليل"], ["other", "ملف آخر"]])}${field("التاريخ", "date", { type: "date", value: ymd(), required: true })}${field("ملاحظة", "note")}</form>`, { ok: "اختيار الملف" });
+    const r = await modal("رفع ملف", `<form class="stack">${select("النوع", "kind", [["echo", "إيكو"], ["lab", "تحليل"], ["other", "ملف آخر"]])}${field("التاريخ", "date", { type: "date", value: ymd(), required: true })}${field("ملاحظة", "note")}</form>`, { ok: "اختيار الملف" });
     if (!r) return;
     const f = await pickFile("image/*,application/pdf"); if (!f) return;
     try {

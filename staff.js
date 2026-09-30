@@ -128,7 +128,7 @@ async function renderHome() {
     doctorBits = `
       <div class="stats">
         <div class="stat"><b>${money(income, cur())}</b><span>دخل اليوم</span></div>
-        <div class="stat"><b>${newPts}</b><span>مريضات جديدات هذا الشهر</span></div>
+        <div class="stat"><b>${newPts}</b><span>مرضى جدد هذا الشهر</span></div>
       </div>
       ${(soon.length || risky.length || inbox.length) ? `<section class="card">
         <h3>تنبيهات</h3>
@@ -770,7 +770,7 @@ async function renderReports() {
   main().innerHTML = `<div class="row-between"><h2 class="page-title">التقارير</h2><input type="month" class="mp" value="${m}" aria-label="الشهر"></div>
     <div class="stats">
       <div class="stat"><b>${cnt("done")}</b><span>زيارات منجزة</span></div>
-      <div class="stat"><b>${newPts}</b><span>مريضات جديدات</span></div>
+      <div class="stat"><b>${newPts}</b><span>مرضى جدد</span></div>
       <div class="stat"><b>${noshowRate}%</b><span>نسبة الغياب</span></div>
       <div class="stat"><b>${esc(money(pays.reduce((s, p) => s + (p.paid || 0), 0), cur()))}</b><span>المقبوض</span></div>
       <div class="stat"><b>${esc(money(pays.reduce((s, p) => s + (p.total || 0) - (p.paid || 0), 0), cur()))}</b><span>ديون الشهر</span></div>
