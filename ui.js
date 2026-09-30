@@ -1,4 +1,5 @@
 // أدوات الواجهة المشتركة
+export const COPYRIGHT = "© 2026 جميع الحقوق محفوظة · momo6250180@gmail.com";
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 

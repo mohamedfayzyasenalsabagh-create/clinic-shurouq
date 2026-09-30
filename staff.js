@@ -4,7 +4,7 @@ import {
   serverTimestamp, runTransaction, arrayUnion, orderBy, limit, Timestamp, registerPatient, audit,
   createStaff, resetStaffPassword, normPhone
 } from "./fb.js";
-import {
+import { COPYRIGHT,
   $, $$, esc, ymd, addDays, parseYmd, fmtDate, fmtTime, tsDate, money, toast, errMsg, modal, confirmBox, info,
   field, select, logoHtml, waLink, debounce, download, empty, compressImage, pickFile, DAYS, MONTHS, daysBetween
 } from "./ui.js";
@@ -530,7 +530,8 @@ function renderMore() {
   ];
   main().innerHTML = `<h2 class="page-title">المزيد</h2>
     <ul class="menu">${items.map(([h, t, n]) => `<li><a href="${h}"><span>${esc(t)}</span>${n ? `<b class="badge">${n}</b>` : ""}<span class="chev">‹</span></a></li>`).join("")}
-    <li><button class="out"><span>تسجيل الخروج</span></button></li></ul>`;
+    <li><button class="out"><span>تسجيل الخروج</span></button></li></ul>
+    <p class="copyright">${esc(COPYRIGHT)}</p>`;
   $(".out").onclick = logout;
 }
 

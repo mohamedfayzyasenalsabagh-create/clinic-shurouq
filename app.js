@@ -3,7 +3,7 @@ import {
   configured, auth, db, P, one, login, firstSetup, onAuthStateChanged, signOut,
   updatePassword, sendPasswordResetEmail, updateDoc, serverTimestamp, setActor, onSnapshot, audit
 } from "./fb.js";
-import { $, esc, toast, errMsg, field, logoHtml, info } from "./ui.js";
+import { COPYRIGHT, $, esc, toast, errMsg, field, logoHtml, info } from "./ui.js";
 
 export const S = { user: null, profile: null, pub: null, clinic: null, unsub: [] };
 const root = () => $("#app");
@@ -101,6 +101,7 @@ function showLogin(msg = "") {
         </form>
       </div>
       <p class="muted small">${esc(S.pub.address || "")} ${S.pub.phone ? `· <span dir="ltr">${esc(S.pub.phone)}</span>` : ""}</p>
+      <p class="copyright">${esc(COPYRIGHT)}</p>
     </div>`;
     root().querySelectorAll(".seg button").forEach((b) => b.onclick = () => { kind = b.dataset.k; msg = ""; render(); });
     $("#lf").onsubmit = async (e) => {
