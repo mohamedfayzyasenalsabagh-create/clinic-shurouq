@@ -85,7 +85,7 @@ async function render() {
   $$(".bottomnav a").forEach((a) => a.classList.toggle("on", a.dataset.r === r));
   window.scrollTo(0, 0);
   if (!main()) return;
-  main().innerHTML = `<div class="loading">جاري التحميل…</div>`;
+  main().innerHTML = `<div class="loading">جارٍ التحميل…</div>`;
   try {
     const V = { home, appts, meds, file, msgs, settings, learn };
     await (V[r] || home)();
@@ -117,7 +117,7 @@ async function home() {
     <section class="card hero">
       <h3>موعدك القادم</h3>
       ${next ? `<div class="big-date">${esc(fmtDate(next.date))}</div><div class="big-time">${esc(fmtTime(next.time))}</div><p>${esc(next.type || "")}</p>
-        <div class="row gap"><button class="btn small cx" data-id="${next.id}">إلغاء الموعد</button><a class="btn small" href="#/appts">كل المواعيد</a></div>`
+        <div class="row gap"><button class="btn small cx" data-id="${next.id}">إلغاء الموعد</button><a class="btn small" href="#/appts">جميع المواعيد</a></div>`
       : `<p class="muted">لا يوجد لديكِ موعد حالياً.</p><button class="btn primary ask-appt">طلب موعد</button>`}
     </section>
     ${needSign.length ? needSign.map((x) => `<section class="card alert-card"><h3>موافقة بانتظار توقيعك</h3><p>${esc(x.name)}</p><button class="btn primary small sign" data-id="${x.id}">قراءة وتوقيع</button></section>`).join("") : ""}
@@ -169,7 +169,7 @@ async function requestModal() {
   await modal("طلب موعد", `<form class="stack">
     ${field("اليوم المناسب", "date", { type: "date", value: addDays(ymd(), 1), required: true, attrs: `min="${ymd()}"` })}
     ${select("الوقت المفضل", "period", [["أي وقت", "أي وقت"], ["الصباح", "الصباح"], ["الظهر", "الظهر"], ["المساء", "المساء"]])}
-    ${select("سبب الزيارة", "type", [["كشفية", "كشفية"], ["مراجعة", "مراجعة"], ["متابعة حمل", "متابعة حمل"], ["إيكو", "إيكو"], ["استشارة تجميلية", "استشارة تجميلية"], ["أخرى", "أخرى"]])}
+    ${select("سبب الزيارة", "type", [["معاينة", "معاينة"], ["مراجعة", "مراجعة"], ["متابعة حمل", "متابعة حمل"], ["تصوير صوتي", "تصوير صوتي"], ["استشارة تجميلية", "استشارة تجميلية"], ["أخرى", "أخرى"]])}
     ${field("ملاحظة (اختياري)", "note", { type: "textarea" })}
     <p class="muted small">ستتواصل العيادة معكِ لتأكيد الوقت.</p></form>`, {
     ok: "إرسال الطلب",
@@ -259,12 +259,12 @@ async function file() {
   const g = pregs.find((x) => x.status === "active");
   const cur = S.clinic?.currency || "ل.س";
   const due = pays.reduce((s, x) => s + (x.total || 0) - (x.paid || 0), 0);
-  const KIND = { echo: "إيكو", lab: "تحليل", other: "ملف" };
+  const KIND = { echo: "تصوير صوتي", lab: "تحليل", other: "ملف" };
   main().innerHTML = `<h2 class="page-title">ملفي</h2>
     ${g ? pregCard(g, pregCalc(g)) : ""}
     <section class="card"><h3>الزيارات</h3>${vs.length ? vs.map((v) => `<div class="visit-mini"><b>${esc(fmtDate(v.date, false))}</b>${v.diagnosis ? `<div>${esc(v.diagnosis)}</div>` : ""}${v.treatment ? `<div class="muted">${esc(v.treatment)}</div>` : ""}${v.publicNote ? `<div class="note-pub">${esc(v.publicNote)}</div>` : ""}</div>`).join("") : empty("لا توجد زيارات")}</section>
     <section class="card"><h3>التحاليل</h3>${labs.length ? `<table class="tbl"><thead><tr><th>التاريخ</th><th>التحليل</th><th>النتيجة</th></tr></thead><tbody>${labs.map((l) => `<tr><td>${esc(l.date)}</td><td>${esc(l.test)}</td><td dir="ltr">${esc(l.value)} ${esc(l.unit || "")}</td></tr>`).join("")}</tbody></table>` : empty("لا توجد تحاليل")}</section>
-    <section class="card"><div class="row-between"><h3>الإيكو والملفات</h3><button class="btn small up">+ رفع تحليل</button></div>
+    <section class="card"><div class="row-between"><h3>التصوير الصوتي والملفات</h3><button class="btn small up">+ رفع تحليل</button></div>
       <p class="muted small">إذا أجريتِ تحليلاً في مختبر خارجي، صوّريه وارفعيه لتطّلع عليه الطبيبة.</p>
       ${fls.length ? `<div class="file-grid">${fls.map((f) => `<button class="file-tile" data-id="${f.id}">${f.data?.startsWith("data:image") ? `<img src="${f.data}" alt="">` : `<span class="pdf">PDF</span>`}<span>${esc(KIND[f.kind] || "ملف")} · ${esc(f.date || "")}</span></button>`).join("")}</div>` : empty("لا توجد ملفات")}</section>
     ${procs.length ? `<section class="card"><h3>الإجراءات</h3>${procs.map((x) => `<div class="visit-mini"><b>${esc(x.name)}</b> · ${esc(fmtDate(x.date, false))}<div>الجلسات: ${x.sessionsDone || 0} / ${x.sessionsTotal || 1}</div>${x.aftercare ? `<div class="pre muted">${esc(x.aftercare)}</div>` : ""}<div>${x.consentSignedAt ? `<span class="chip ok">الموافقة موقّعة</span>` : `<button class="btn small primary sign" data-id="${x.id}">توقيع الموافقة</button>`}</div></div>`).join("")}</section>` : ""}
@@ -278,7 +278,7 @@ async function file() {
 }
 
 async function uploadLab() {
-  const r = await modal("رفع تحليل", `<form class="stack">${select("النوع", "kind", [["lab", "تحليل"], ["echo", "إيكو"], ["other", "ملف آخر"]])}${field("تاريخ التحليل", "date", { type: "date", value: ymd(), required: true })}${field("ملاحظة", "note")}</form>`, { ok: "اختيار الصورة" });
+  const r = await modal("رفع تحليل", `<form class="stack">${select("النوع", "kind", [["lab", "تحليل"], ["echo", "تصوير صوتي"], ["other", "ملف آخر"]])}${field("تاريخ التحليل", "date", { type: "date", value: ymd(), required: true })}${field("ملاحظة", "note")}</form>`, { ok: "اختيار الصورة" });
   if (!r) return;
   const f = await pickFile("image/*,application/pdf"); if (!f) return;
   try {
@@ -286,7 +286,7 @@ async function uploadLab() {
     const data = await compressImage(f);
     const p = me();
     const ref = await addDoc(P.sub(T.pid, "files"), { ...r, data, uploadedBy: "patient", createdAt: serverTimestamp() });
-    await addDoc(P.col("inbox"), { patientId: p.id, patientName: p.name, label: r.kind === "echo" ? "إيكو" : "تحليل", fileId: ref.id, seen: false, at: serverTimestamp() });
+    await addDoc(P.col("inbox"), { patientId: p.id, patientName: p.name, label: r.kind === "echo" ? "تصوير صوتي" : "تحليل", fileId: ref.id, seen: false, at: serverTimestamp() });
     toast("تم الرفع، وستطّلع عليه الطبيبة");
     file();
   } catch (e) { toast(errMsg(e), true); }

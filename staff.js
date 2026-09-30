@@ -77,7 +77,7 @@ async function render() {
   window.scrollTo(0, 0);
   const m = main();
   if (!m) return;
-  m.innerHTML = `<div class="loading">جاري التحميل…</div>`;
+  m.innerHTML = `<div class="loading">جارٍ التحميل…</div>`;
   try {
     switch (r) {
       case "home": return await renderHome();
@@ -128,12 +128,12 @@ async function renderHome() {
     doctorBits = `
       <div class="stats">
         <div class="stat"><b>${money(income, cur())}</b><span>دخل اليوم</span></div>
-        <div class="stat"><b>${newPts}</b><span>مريضات جدد هذا الشهر</span></div>
+        <div class="stat"><b>${newPts}</b><span>مريضات جديدات هذا الشهر</span></div>
       </div>
       ${(soon.length || risky.length || inbox.length) ? `<section class="card">
         <h3>تنبيهات</h3>
         <ul class="plain">
-          ${soon.map((a) => `<li><a href="#/p/${a.patientId}/preg">🤰 ${esc(a.patientName)}: موعد الولادة المتوقع ${esc(fmtDate(a.edd, false))} (${daysBetween(today, a.edd) >= 0 ? "بعد " + daysBetween(today, a.edd) + " يوم" : "تجاوزته"})</a></li>`).join("")}
+          ${soon.map((a) => `<li><a href="#/p/${a.patientId}/preg">🤰 ${esc(a.patientName)}: موعد الولادة المتوقع ${esc(fmtDate(a.edd, false))} (${daysBetween(today, a.edd) >= 0 ? "بعد " + daysBetween(today, a.edd) + " يوم" : "تجاوزت الموعد"})</a></li>`).join("")}
           ${risky.map((a) => `<li><a href="#/p/${a.patientId}/preg"><span class="chip danger">حمل عالي الخطورة</span> ${esc(a.patientName)}</a></li>`).join("")}
           ${inbox.map((i) => `<li><a href="#/p/${i.patientId}/files">📎 ${esc(i.patientName)} رفعت ${esc(i.label || "ملف")}</a></li>`).join("")}
         </ul></section>` : ""}`;
@@ -148,7 +148,7 @@ async function renderHome() {
     </div>
     ${doctorBits}
     <section class="card">
-      <div class="row-between"><h3>مواعيد اليوم</h3><a class="btn small" href="#/appts">كل المواعيد</a></div>
+      <div class="row-between"><h3>مواعيد اليوم</h3><a class="btn small" href="#/appts">جميع المواعيد</a></div>
       ${appts.length ? `<ul class="appt-list">${appts.map(apptRow).join("")}</ul>` : empty("لا توجد مواعيد اليوم")}
     </section>
     <section class="card">
@@ -188,7 +188,7 @@ export async function apptActions(a) {
         ${doc_ ? `<button class="btn primary" data-act="visit">تسجيل زيارة</button>` : ""}
         ${doc_ ? `<button class="btn" data-act="card">بطاقة المريضة</button>` : `<button class="btn" data-act="card">بيانات المريضة</button>`}
         <button class="btn" data-act="pay">تسجيل دفعة</button>
-        <a class="btn" target="_blank" rel="noopener" href="${esc(waLink(a.phone || p.phone, reminderText(a)))}">تذكير واتساب</a>
+        <a class="btn" target="_blank" rel="noopener" href="${esc(waLink(a.phone || p.phone, reminderText(a)))}">تذكير عبر واتساب</a>
         <a class="btn" href="tel:${esc(a.phone || p.phone || "")}">اتصال</a>
         ${!["done", "cancelled"].includes(a.status) ? `<button class="btn" data-act="move">تأجيل</button><button class="btn danger" data-act="cancel">إلغاء الموعد</button>` : ""}
       </div>`, { ok: null, cancel: "إغلاق", onOpen: (wrap) => resolve(wrap) });
@@ -402,7 +402,7 @@ export async function newPatientModal() {
     ${field("رقم الجوال", "phone", { required: true, attrs: 'dir="ltr" inputmode="tel"', placeholder: "09xxxxxxxx" })}
     <div class="grid2">
       ${field("العمر", "age", { type: "number", attrs: 'min="0" max="120"' })}
-      ${select("زمرة الدم", "bloodType", ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])}
+      ${select("فصيلة الدم", "bloodType", ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"])}
     </div>
     ${field("العنوان", "address")}
     <p class="muted small">سيُنشأ للمريضة حساب تلقائياً برقم جوالها.</p>
@@ -498,7 +498,7 @@ async function renderMoney() {
       <a class="btn small" href="#/money">اليوم</a>
       <a class="btn small" href="#/money?from=${monthStart}&to=${ymd()}">هذا الشهر</a>
       <label class="field inline"><span>من</span><input type="date" class="f" value="${from}"></label>
-      <label class="field inline"><span>لـ</span><input type="date" class="t" value="${to}"></label>
+      <label class="field inline"><span>إلى</span><input type="date" class="t" value="${to}"></label>
     </div>` : `<p class="muted">دفعات اليوم</p>`}
     <div class="stats">
       <div class="stat"><b>${esc(money(paid, cur()))}</b><span>المقبوض</span></div>
@@ -507,7 +507,7 @@ async function renderMoney() {
     </div>
     <section class="card">
       ${pays.length ? `<table class="tbl"><thead><tr><th>المريضة</th><th>الخدمة</th><th>المدفوع</th><th>التاريخ</th><th></th></tr></thead><tbody>
-      ${pays.map((p) => `<tr><td><a href="#/p/${p.patientId}/money">${esc(p.patientName)}</a></td><td>${esc(p.service || "")}</td><td>${esc(money(p.paid, cur()))}${p.total > p.paid ? ` <span class="chip warn">باقي ${esc(money(p.total - p.paid, cur()))}</span>` : ""}</td><td>${esc(p.date)}</td>
+      ${pays.map((p) => `<tr><td><a href="#/p/${p.patientId}/money">${esc(p.patientName)}</a></td><td>${esc(p.service || "")}</td><td>${esc(money(p.paid, cur()))}${p.total > p.paid ? ` <span class="chip warn">المتبقي ${esc(money(p.total - p.paid, cur()))}</span>` : ""}</td><td>${esc(p.date)}</td>
       <td><button class="icon-btn rc" data-id="${p.id}" aria-label="إيصال">🧾</button></td></tr>`).join("")}</tbody></table>` : empty("لا توجد دفعات")}
     </section>${debts}`;
   if (doc_) {
@@ -524,8 +524,8 @@ function renderMore() {
     ["#/requests", "طلبات المواعيد من التطبيق", S._reqCount],
     ["#/messages", "رسائل المريضات", S._msgCount],
     ["#/waitlist", "قائمة الانتظار الاحتياطية"],
-    ["#/tv", "شاشة الانتظار (للتلفزيون)"],
-    ...(d ? [["#/reports", "التقارير"], ["#/staff", "الموظفين"], ["#/settings", "إعدادات العيادة"], ["#/audit", "سجل التعديلات"], ["#/backup", "النسخة الاحتياطية"]] : []),
+    ["#/tv", "شاشة الانتظار (للتلفاز)"],
+    ...(d ? [["#/reports", "التقارير"], ["#/staff", "الموظفون"], ["#/settings", "إعدادات العيادة"], ["#/audit", "سجل التعديلات"], ["#/backup", "النسخة الاحتياطية"]] : []),
     ["#/password", "تغيير كلمة المرور"],
   ];
   main().innerHTML = `<h2 class="page-title">المزيد</h2>
@@ -610,7 +610,7 @@ function renderTv() {
   main().innerHTML = `<div class="tv">
     <div class="tv-brand">${logoHtml(S.pub, 90)}<div><h1>${esc(S.pub.name)}</h1><p>${esc(S.pub.title || "")}</p></div></div>
     <div class="tv-label">الدور الحالي</div><div class="tv-num">—</div>
-    <div class="row gap no-tv"><button class="btn primary next">نادِ الدور التالي</button><button class="btn fs">ملء الشاشة</button></div>
+    <div class="row gap no-tv"><button class="btn primary next">استدعاء الدور التالي</button><button class="btn fs">ملء الشاشة</button></div>
   </div>`;
   S.unsub.push(onSnapshot(P.colDoc("live", "queue"), (s) => {
     const el = $(".tv-num");
@@ -713,7 +713,7 @@ async function renderSettings() {
 async function renderStaff() {
   const staff = await list(query(P.users(), where("clinicId", "==", C), where("role", "==", "secretary")));
   const act = staff.filter((s) => s.active);
-  main().innerHTML = `<div class="row-between"><h2 class="page-title">الموظفين</h2><button class="btn primary add">+ حساب سكرتارية</button></div>
+  main().innerHTML = `<div class="row-between"><h2 class="page-title">الموظفون</h2><button class="btn primary add">+ حساب سكرتارية</button></div>
     <section class="card">${act.length ? `<ul class="plain">${act.map((s) => `<li class="req">
       <div><b>${esc(s.name)}</b> <span class="muted" dir="ltr">${esc(s.phone)}</span></div>
       <div class="row gap"><button class="btn small rp" data-id="${s.id}">كلمة مرور جديدة</button><button class="btn small danger off" data-id="${s.id}">إيقاف الحساب</button></div></li>`).join("")}</ul>` : empty("لا يوجد موظفون")}</section>
@@ -770,7 +770,7 @@ async function renderReports() {
   main().innerHTML = `<div class="row-between"><h2 class="page-title">التقارير</h2><input type="month" class="mp" value="${m}" aria-label="الشهر"></div>
     <div class="stats">
       <div class="stat"><b>${cnt("done")}</b><span>زيارات منجزة</span></div>
-      <div class="stat"><b>${newPts}</b><span>مريضات جدد</span></div>
+      <div class="stat"><b>${newPts}</b><span>مريضات جديدات</span></div>
       <div class="stat"><b>${noshowRate}%</b><span>نسبة الغياب</span></div>
       <div class="stat"><b>${esc(money(pays.reduce((s, p) => s + (p.paid || 0), 0), cur()))}</b><span>المقبوض</span></div>
       <div class="stat"><b>${esc(money(pays.reduce((s, p) => s + (p.total || 0) - (p.paid || 0), 0), cur()))}</b><span>ديون الشهر</span></div>
@@ -811,7 +811,7 @@ function renderBackup() {
     try {
       const out = { exportedAt: new Date().toISOString(), clinic: S.clinic, patients: [] };
       for (const k of ["appointments", "payments", "requests", "waitlist", "pregAlerts", "stats", "inbox"]) {
-        prog.textContent = `جاري: ${k}…`;
+        prog.textContent = `جارٍ: ${k}…`;
         out[k] = await list(P.col(k));
       }
       const subs = ["medical", "visits", "prescriptions", "pregnancies", "fertility", "labs", "private", "procedures", "files", "messages"];

@@ -157,9 +157,9 @@ export function defaultHours() {
 }
 export function defaultServices() {
   return [
-    { id: "kashf", name: "كشفية", price: 0, duration: 20, kind: "general" },
+    { id: "kashf", name: "معاينة", price: 0, duration: 20, kind: "general" },
     { id: "review", name: "مراجعة", price: 0, duration: 15, kind: "general" },
-    { id: "echo", name: "إيكو", price: 0, duration: 20, kind: "general" },
+    { id: "echo", name: "تصوير صوتي", price: 0, duration: 20, kind: "general" },
     { id: "preg", name: "متابعة حمل", price: 0, duration: 20, kind: "general" },
     { id: "cosm", name: "استشارة تجميلية", price: 0, duration: 30, kind: "cosmetic" },
   ];
@@ -215,7 +215,7 @@ export async function resetPatientPassword(phone) {
   await updateDoc(P.user(oldUid), { active: false });
   await setDoc(P.phone(phone), { patientUid: r.uid, patientVer: r.ver }, { merge: true });
   for (const pid of od.patientIds || []) await updateDoc(P.patient(pid), { uid: r.uid });
-  await audit("إعادة تعيين كلمة سر مريضة", phone);
+  await audit("إعادة تعيين كلمة مرور مريضة", phone);
   return temp;
 }
 
@@ -252,7 +252,7 @@ export async function resetStaffPassword(uid) {
   });
   await updateDoc(P.user(uid), { active: false });
   await setDoc(P.phone(d.phone), { staffUid: r.uid, staffVer: r.ver }, { merge: true });
-  await audit("إعادة تعيين كلمة سر موظف", d.name);
+  await audit("إعادة تعيين كلمة مرور موظف", d.name);
   return temp;
 }
 

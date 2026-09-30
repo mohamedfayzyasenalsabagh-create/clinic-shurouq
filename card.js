@@ -47,7 +47,7 @@ export async function renderCard() {
       <a href="#/patients" class="icon-btn" aria-label="رجوع">→</a>
       <span class="avatar lg">${esc(p.name.trim()[0] || "؟")}</span>
       <div class="grow"><h2>${esc(p.name)} ${p.archived ? `<span class="chip">مؤرشفة</span>` : ""}</h2>
-        <div class="muted small"><span dir="ltr">${esc(p.phone)}</span>${p.age ? ` · ${esc(p.age)} سنة` : ""}${p.bloodType ? ` · زمرة ${esc(p.bloodType)}` : ""}</div></div>
+        <div class="muted small"><span dir="ltr">${esc(p.phone)}</span>${p.age ? ` · ${esc(p.age)} سنة` : ""}${p.bloodType ? ` · فصيلة ${esc(p.bloodType)}` : ""}</div></div>
     </div>
     <div class="row gap wrap quick">
       <button class="btn small primary q-book">+ موعد</button>
@@ -57,7 +57,7 @@ export async function renderCard() {
       <a class="btn small" target="_blank" rel="noopener" href="${esc(waLink(p.phone, `مرحباً ${p.name}، `))}">واتساب</a>
     </div>
     <nav class="tabs" aria-label="أقسام البطاقة">${tabs.map(([k, t]) => `<a href="#/p/${pid}/${k}" class="${k === tab ? "on" : ""}">${esc(t)}</a>`).join("")}</nav>
-    <div id="tab" class="tab-body"><div class="loading">جاري التحميل…</div></div>`;
+    <div id="tab" class="tab-body"><div class="loading">جارٍ التحميل…</div></div>`;
   $(".tabs .on")?.scrollIntoView({ inline: "center", block: "nearest" });
   $(".q-book").onclick = () => bookModal({ pid });
   $(".q-pay").onclick = () => paymentModal(pid);
@@ -93,7 +93,7 @@ async function summary(p) {
       <section class="card"><h3>آخر زيارة</h3>${last ? `<p><b>${esc(fmtDate(last.date, false))}</b><br>${esc(last.diagnosis || last.complaint || "")}</p>` : empty("لا توجد زيارات")}</section>
     </div>
     <section class="card"><div class="row-between"><h3>الأدوية الحالية</h3><button class="btn small q-rx2">+ وصفة</button></div>
-      ${meds.length ? `<ul class="plain">${meds.map((x) => `<li><b>${esc(x.drug)}</b> ${esc(x.dose || "")} ${x.times ? `· ${esc(x.times)}` : ""} ${x.endDate ? `<span class="muted small">لـ ${esc(x.endDate)}</span>` : `<span class="muted small">مستمر</span>`}</li>`).join("")}</ul>` : empty("لا توجد أدوية حالية")}</section>
+      ${meds.length ? `<ul class="plain">${meds.map((x) => `<li><b>${esc(x.drug)}</b> ${esc(x.dose || "")} ${x.times ? `· ${esc(x.times)}` : ""} ${x.endDate ? `<span class="muted small">حتى ${esc(x.endDate)}</span>` : `<span class="muted small">مستمر</span>`}</li>`).join("")}</ul>` : empty("لا توجد أدوية حالية")}</section>
     <section class="card"><div class="row-between"><h3>التاريخ المرضي</h3><button class="btn small ed">تعديل</button></div>
       <table class="kv">
         <tr><th>أمراض مزمنة</th><td>${esc(m.chronic || "—")}</td></tr>
@@ -151,7 +151,7 @@ async function infoTab(p) {
   const next = apps.filter((a) => a.date >= ymd() && !["cancelled", "done", "noshow"].includes(a.status)).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
   tabEl().innerHTML = `<section class="card"><div class="row-between"><h3>البيانات الأساسية</h3><button class="btn small ed">تعديل</button></div>
     <table class="kv"><tr><th>الاسم</th><td>${esc(p.name)}</td></tr><tr><th>الجوال</th><td dir="ltr">${esc(p.phone)}</td></tr>
-    <tr><th>العمر</th><td>${esc(p.age ?? "—")}</td></tr><tr><th>زمرة الدم</th><td>${esc(p.bloodType || "—")}</td></tr><tr><th>العنوان</th><td>${esc(p.address || "—")}</td></tr></table></section>
+    <tr><th>العمر</th><td>${esc(p.age ?? "—")}</td></tr><tr><th>فصيلة الدم</th><td>${esc(p.bloodType || "—")}</td></tr><tr><th>العنوان</th><td>${esc(p.address || "—")}</td></tr></table></section>
     <section class="card"><h3>الموعد القادم</h3>${next ? `<p><b>${esc(fmtDate(next.date))}</b> · ${esc(fmtTime(next.time))} · ${esc(next.type || "")}</p>` : empty("لا يوجد موعد")}</section>
     <p class="muted small">التفاصيل الطبية تظهر للطبيبة فقط.</p>`;
   $(".ed").onclick = () => editBasic(p);
@@ -159,7 +159,7 @@ async function infoTab(p) {
 async function editBasic(p) {
   await modal("تعديل البيانات", `<form class="stack">
     ${field("الاسم", "name", { value: p.name, required: true })}
-    <div class="grid2">${field("العمر", "age", { type: "number", value: p.age ?? "" })}${select("زمرة الدم", "bloodType", ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], p.bloodType)}</div>
+    <div class="grid2">${field("العمر", "age", { type: "number", value: p.age ?? "" })}${select("فصيلة الدم", "bloodType", ["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"], p.bloodType)}</div>
     ${field("العنوان", "address", { value: p.address })}
     <p class="muted small">رقم الجوال هو رقم الدخول، ولا يمكن تغييره من هنا.</p></form>`, {
     onOk: async (f) => {
@@ -309,12 +309,12 @@ async function preg(p) {
       <table class="kv">
         <tr><th>أول يوم من آخر دورة</th><td>${esc(fmtDate(g.lmp, false))}</td></tr>
         <tr><th>الولادة المتوقعة (حسب الدورة)</th><td>${esc(fmtDate(g.eddLmp, false))}</td></tr>
-        ${g.eddUs ? `<tr><th>الولادة المتوقعة (مصححة بالإيكو)</th><td><b>${esc(fmtDate(g.eddUs, false))}</b></td></tr>` : ""}
+        ${g.eddUs ? `<tr><th>الولادة المتوقعة (مصححة بالتصوير الصوتي)</th><td><b>${esc(fmtDate(g.eddUs, false))}</b></td></tr>` : ""}
         <tr><th>باقي</th><td>${c.left >= 0 ? `${c.left} يوم` : `تجاوزت الموعد بـ ${-c.left} يوم`}</td></tr>
         ${g.riskNote ? `<tr><th>سبب الخطورة</th><td>${esc(g.riskNote)}</td></tr>` : ""}
       </table>
       <div class="row gap wrap">
-        <button class="btn small us">تصحيح بالإيكو</button>
+        <button class="btn small us">تصحيح بالتصوير الصوتي</button>
         <button class="btn small sched">جدول زيارات الحمل</button>
         <button class="btn small rep">تقرير حمل</button>
         <button class="btn small end">تسجيل الولادة / إنهاء</button>
@@ -344,7 +344,7 @@ async function preg(p) {
       <div class="grid2">${field("الوزن (كغ)", "weight", { type: "number", attrs: 'step="0.1" min="0"' })}${field("الضغط", "bp", { placeholder: "120/80", attrs: 'dir="ltr"' })}</div>
       <div class="grid2">${field("نبض الجنين", "fhr", { type: "number", attrs: 'min="0"' })}${field("ارتفاع قاع الرحم (سم)", "fundal", { type: "number", attrs: 'step="0.5" min="0"' })}</div>
       ${field("وزن الجنين التقديري (غ)", "efw", { type: "number", attrs: 'min="0"' })}
-      ${field("ملاحظات الإيكو / الزيارة", "note", { type: "textarea" })}</form>`, {
+      ${field("ملاحظات التصوير الصوتي / الزيارة", "note", { type: "textarea" })}</form>`, {
       onOk: async (f) => {
         await updateDoc(gRef, { measurements: [...(g.measurements || []), f] });
         await audit("قياس حمل", p.name);
@@ -353,9 +353,9 @@ async function preg(p) {
     });
   };
   $(".us").onclick = async () => {
-    await modal("تصحيح موعد الولادة بالإيكو", `<form class="stack">
-      ${field("تاريخ الإيكو", "usDate", { type: "date", value: ymd(), required: true })}
-      <div class="grid2">${field("عمر الحمل بالإيكو (أسابيع)", "w", { type: "number", required: true, attrs: 'min="4" max="42"' })}${field("وأيام", "d", { type: "number", value: 0, attrs: 'min="0" max="6"' })}</div></form>`, {
+    await modal("تصحيح موعد الولادة بالتصوير الصوتي", `<form class="stack">
+      ${field("تاريخ التصوير الصوتي", "usDate", { type: "date", value: ymd(), required: true })}
+      <div class="grid2">${field("عمر الحمل بالتصوير الصوتي (أسابيع)", "w", { type: "number", required: true, attrs: 'min="4" max="42"' })}${field("وأيام", "d", { type: "number", value: 0, attrs: 'min="0" max="6"' })}</div></form>`, {
       onOk: async (f) => {
         const ga = f.w * 7 + (f.d || 0);
         const eddUs = addDays(f.usDate, 280 - ga);
@@ -397,7 +397,7 @@ async function preg(p) {
 async function newPregModal(p) {
   await modal("بدء متابعة حمل", `<form class="stack">
     ${field("أول يوم من آخر دورة", "lmp", { type: "date", required: true })}
-    <p class="muted small">يحسب النظام عمر الحمل وموعد الولادة تلقائياً، ويمكنكِ تصحيحه لاحقاً وفق أول إيكو.</p></form>`, {
+    <p class="muted small">يحسب النظام عمر الحمل وموعد الولادة تلقائياً، ويمكنكِ تصحيحه لاحقاً وفق أول تصوير صوتي.</p></form>`, {
     ok: "بدء",
     onOk: async (f) => {
       const g = { clinicId: C, patientId: p.id, lmp: f.lmp, eddLmp: addDays(f.lmp, 280), eddUs: null, status: "active", highRisk: false, riskNote: "", measurements: [], createdAt: serverTimestamp() };
@@ -509,8 +509,8 @@ async function gyn(p) {
     <section class="card stack"><h3>بروتوكول التنشيط</h3>
       <textarea class="proto" rows="3" aria-label="البروتوكول" placeholder="الأدوية، الجرعات، مواعيد المراقبة…">${esc(fr.protocol || "")}</textarea>
       <button class="btn small savep">حفظ البروتوكول</button>
-      <div class="row-between"><h4>مواعيد الإبر</h4><button class="btn small addi">+ إبرة</button></div>
-      ${(fr.injections || []).length ? `<ul class="plain">${fr.injections.map((x, i) => `<li class="row-between"><label class="check"><input type="checkbox" data-i="${i}" class="inj" ${x.done ? "checked" : ""}><span>${esc(x.date)} ${esc(x.time || "")} · <b>${esc(x.drug)}</b> ${esc(x.dose || "")}</span></label></li>`).join("")}</ul>` : empty("لا توجد إبر مجدولة")}
+      <div class="row-between"><h4>مواعيد الحُقن</h4><button class="btn small addi">+ حقنة</button></div>
+      ${(fr.injections || []).length ? `<ul class="plain">${fr.injections.map((x, i) => `<li class="row-between"><label class="check"><input type="checkbox" data-i="${i}" class="inj" ${x.done ? "checked" : ""}><span>${esc(x.date)} ${esc(x.time || "")} · <b>${esc(x.drug)}</b> ${esc(x.dose || "")}</span></label></li>`).join("")}</ul>` : empty("لا توجد حقن مجدولة")}
     </section>`;
   const fRef = P.subDoc(p.id, "fertility", "main");
   const saveF = async (patch) => { await setDoc(fRef, { ...fr, ...patch, updatedAt: serverTimestamp() }); refresh(); };
@@ -521,7 +521,7 @@ async function gyn(p) {
   };
   $(".savep").onclick = () => saveF({ protocol: $(".proto").value });
   $(".addi").onclick = async () => {
-    const r = await modal("إبرة", `<form class="stack">${field("التاريخ", "date", { type: "date", value: ymd(), required: true })}${field("الوقت", "time", { type: "time" })}${field("الدواء", "drug", { required: true })}${field("الجرعة", "dose")}</form>`);
+    const r = await modal("حقنة", `<form class="stack">${field("التاريخ", "date", { type: "date", value: ymd(), required: true })}${field("الوقت", "time", { type: "time" })}${field("الدواء", "drug", { required: true })}${field("الجرعة", "dose")}</form>`);
     if (r) saveF({ injections: [...(fr.injections || []), { ...r, done: false }].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time)) });
   };
   $$(".inj").forEach((c) => c.onchange = () => { const inj = fr.injections.slice(); inj[c.dataset.i] = { ...inj[c.dataset.i], done: c.checked }; saveF({ injections: inj }); });
@@ -534,11 +534,11 @@ async function cosm(p) {
     ${procs.length ? procs.map((x) => `<section class="card">
       <div class="row-between"><h4>${esc(x.name)}</h4><span class="muted small">${esc(fmtDate(x.date, false))}</span></div>
       ${x.price ? `<p>السعر: ${esc(money(x.price, cur()))}</p>` : ""}
-      <p>الجلسات: <b>${x.sessionsDone || 0} / ${x.sessionsTotal || 1}</b> <button class="btn small ses" data-id="${x.id}" ${(x.sessionsDone || 0) >= (x.sessionsTotal || 1) ? "disabled" : ""}>+ جلسة منفذة</button></p>
+      <p>الجلسات: <b>${x.sessionsDone || 0} / ${x.sessionsTotal || 1}</b> <button class="btn small ses" data-id="${x.id}" ${(x.sessionsDone || 0) >= (x.sessionsTotal || 1) ? "disabled" : ""}>+ تسجيل جلسة منفذة</button></p>
       ${x.details ? `<p><span class="muted">التفاصيل:</span> ${esc(x.details)}</p>` : ""}
       ${x.aftercare ? `<p><span class="muted">تعليمات ما بعد الإجراء (تظهر للمريضة):</span> ${esc(x.aftercare)}</p>` : ""}
       <p>الموافقة: ${x.consentSignedAt ? `<span class="chip ok">موقّعة ${esc(x.consentName || "")} · ${esc(tsDate(x.consentSignedAt))}</span>` : `<span class="chip warn">بانتظار توقيع المريضة من التطبيق</span> <button class="btn small sign" data-id="${x.id}">توقيع حضوري</button>`}</p>
-      <div class="row gap wrap"><button class="btn small ph" data-id="${x.id}">صور قبل/بعد</button><button class="btn small fu" data-id="${x.id}">موعد متابعة</button></div>
+      <div class="row gap wrap"><button class="btn small ph" data-id="${x.id}">صور ما قبل الإجراء وما بعده</button><button class="btn small fu" data-id="${x.id}">موعد متابعة</button></div>
     </section>`).join("") : empty("لا توجد إجراءات")}`;
   $(".add").onclick = async () => {
     const svcs = (S.clinic?.services || []).filter((s) => s.kind === "cosmetic");
@@ -584,10 +584,10 @@ async function photosModal(p, x) {
   const draw = async (w) => {
     const ph = await load();
     const grp = (st) => ph.filter((y) => y.stage === st).map((y) => `<img src="${y.data}" alt="صورة ${st === "before" ? "قبل" : "بعد"} ${esc(y.date)}" class="thumb">`).join("") || `<span class="muted small">لا توجد صور</span>`;
-    w.querySelector(".ph-body").innerHTML = `<h4>قبل</h4><div class="thumbs">${grp("before")}</div><h4>بعد</h4><div class="thumbs">${grp("after")}</div>`;
+    w.querySelector(".ph-body").innerHTML = `<h4>قبل الإجراء</h4><div class="thumbs">${grp("before")}</div><h4>بعد الإجراء</h4><div class="thumbs">${grp("after")}</div>`;
     w.querySelectorAll(".thumb").forEach((im) => im.onclick = () => { const v = window.open(); v?.document.write(`<img src="${im.src}" style="max-width:100%">`); });
   };
-  await modal(`صور ${x.name}`, `<p class="muted small">الصور سرية ولا تظهر إلا للطبيبة.</p><div class="row gap"><button class="btn small up" data-s="before">+ صورة قبل</button><button class="btn small up" data-s="after">+ صورة بعد</button></div><div class="ph-body"></div>`, {
+  await modal(`صور ${x.name}`, `<p class="muted small">الصور سرية ولا تظهر إلا للطبيبة.</p><div class="row gap"><button class="btn small up" data-s="before">+ صورة قبل الإجراء</button><button class="btn small up" data-s="after">+ صورة بعد الإجراء</button></div><div class="ph-body"></div>`, {
     ok: null, cancel: "إغلاق", wide: true,
     onOpen: (w) => {
       draw(w);
@@ -612,20 +612,20 @@ async function files(p) {
   fls.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
   const unseen = await list(query(P.col("inbox"), where("patientId", "==", p.id), where("seen", "==", false)));
   for (const u of unseen) await updateDoc(P.colDoc("inbox", u.id), { seen: true });
-  const KIND = { echo: "إيكو", lab: "تحليل", other: "ملف" };
+  const KIND = { echo: "تصوير صوتي", lab: "تحليل", other: "ملف" };
   tabEl().innerHTML = `
     <section class="card"><div class="row-between"><h3>نتائج التحاليل</h3><button class="btn primary small addl">+ نتيجة</button></div>
       ${Object.keys(byTest).length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>التحليل</th><th>آخر قيمة</th><th>السابقة</th><th>التغير</th></tr></thead><tbody>
       ${Object.entries(byTest).map(([t, a]) => { const [n, o] = a; const dv = o && !isNaN(n.value) && !isNaN(o.value) ? (Number(n.value) - Number(o.value)).toFixed(1) : ""; return `<tr><td><b>${esc(t)}</b></td><td>${esc(n.value)} ${esc(n.unit || "")}<br><small class="muted">${esc(n.date)}</small></td><td>${o ? `${esc(o.value)}<br><small class="muted">${esc(o.date)}</small>` : "—"}</td><td dir="ltr">${dv ? (dv > 0 ? "▲ " : dv < 0 ? "▼ " : "") + esc(dv) : ""}</td></tr>`; }).join("")}
       </tbody></table></div>` : empty("لا توجد نتائج")}
     </section>
-    <section class="card"><div class="row-between"><h3>الإيكو والملفات</h3><button class="btn primary small addf">+ رفع</button></div>
+    <section class="card"><div class="row-between"><h3>التصوير الصوتي والملفات</h3><button class="btn primary small addf">+ رفع</button></div>
       ${fls.length ? `<div class="file-grid">${fls.map((f) => `<button class="file-tile" data-id="${f.id}">
         ${f.data?.startsWith("data:image") ? `<img src="${f.data}" alt="">` : `<span class="pdf">PDF</span>`}
         <span>${esc(KIND[f.kind] || "ملف")} · ${esc(f.date || "")}${f.uploadedBy === "patient" ? " · من المريضة" : ""}</span></button>`).join("")}</div>` : empty("لا توجد ملفات")}
     </section>`;
   $(".addl").onclick = async () => {
-    const tests = [...new Set([...Object.keys(byTest), "Hb", "TSH", "سكر صيامي", "Ferritin", "Vit D", "Beta hCG", "AMH", "FSH", "LH", "Prolactin", "Estradiol", "Progesterone"])];
+    const tests = [...new Set([...Object.keys(byTest), "Hb", "TSH", "سكر الصيام", "Ferritin", "Vit D", "Beta hCG", "AMH", "FSH", "LH", "Prolactin", "Estradiol", "Progesterone"])];
     await modal("نتيجة تحليل", `<form class="stack">
       <datalist id="tests">${tests.map((t) => `<option value="${esc(t)}">`).join("")}</datalist>
       ${field("التحليل", "test", { required: true, attrs: 'list="tests"' })}
@@ -635,7 +635,7 @@ async function files(p) {
     });
   };
   $(".addf").onclick = async () => {
-    const r = await modal("رفع ملف", `<form class="stack">${select("النوع", "kind", [["echo", "إيكو"], ["lab", "تحليل"], ["other", "ملف آخر"]])}${field("التاريخ", "date", { type: "date", value: ymd(), required: true })}${field("ملاحظة", "note")}</form>`, { ok: "اختيار الملف" });
+    const r = await modal("رفع ملف", `<form class="stack">${select("النوع", "kind", [["echo", "تصوير صوتي"], ["lab", "تحليل"], ["other", "ملف آخر"]])}${field("التاريخ", "date", { type: "date", value: ymd(), required: true })}${field("ملاحظة", "note")}</form>`, { ok: "اختيار الملف" });
     if (!r) return;
     const f = await pickFile("image/*,application/pdf"); if (!f) return;
     try {
@@ -669,7 +669,7 @@ async function appts(p) {
   const arr = (await list(query(P.col("appointments"), where("patientId", "==", p.id)))).sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
   const reqs = await list(query(P.col("requests"), where("patientId", "==", p.id), where("status", "==", "new")));
   tabEl().innerHTML = `
-    ${reqs.length ? `<div class="alert">عندها ${reqs.length} طلب موعد جديد. <a href="#/requests">افتحي الطلبات</a></div>` : ""}
+    ${reqs.length ? `<div class="alert">لديها ${reqs.length} طلب موعد جديد. <a href="#/requests">افتحي الطلبات</a></div>` : ""}
     <div class="row-between"><h3>المواعيد</h3><button class="btn primary small add">+ موعد</button></div>
     ${arr.length ? `<ul class="appt-list">${arr.map((a) => `<li><button class="appt st-${a.status}" data-a="${a.id}"><span class="t">${esc(a.date)}<br>${esc(fmtTime(a.time))}</span><span class="n">${esc(a.type || "موعد")}${a.rating ? `<small>${"★".repeat(a.rating)}</small>` : ""}</span><span class="chip">${esc(STATUS[a.status])}</span></button></li>`).join("")}</ul>` : empty("لا توجد مواعيد")}`;
   $(".add").onclick = () => bookModal({ pid: p.id });
@@ -771,7 +771,7 @@ async function printFile(p) {
   vs.sort((a, b) => b.date.localeCompare(a.date)); rxs.sort((a, b) => b.date.localeCompare(a.date)); labs.sort((a, b) => b.date.localeCompare(a.date));
   await audit("طباعة ملف مريضة", p.name);
   printDoc(S.pub, "الملف الطبي", `
-    <table class="kv"><tr><th>الاسم</th><td>${esc(p.name)}</td></tr><tr><th>العمر</th><td>${esc(p.age ?? "")}</td></tr><tr><th>الجوال</th><td dir="ltr">${esc(p.phone)}</td></tr><tr><th>زمرة الدم</th><td>${esc(p.bloodType || "")}</td></tr>
+    <table class="kv"><tr><th>الاسم</th><td>${esc(p.name)}</td></tr><tr><th>العمر</th><td>${esc(p.age ?? "")}</td></tr><tr><th>الجوال</th><td dir="ltr">${esc(p.phone)}</td></tr><tr><th>فصيلة الدم</th><td>${esc(p.bloodType || "")}</td></tr>
     <tr><th>أمراض مزمنة</th><td>${esc(m.chronic || "—")}</td></tr><tr><th>حساسية</th><td>${esc(m.allergies || "—")}</td></tr><tr><th>عمليات</th><td>${esc(m.surgeries || "—")}</td></tr>
     <tr><th>G / P / A / CS</th><td>${esc(m.gravida ?? "-")} / ${esc(m.para ?? "-")} / ${esc(m.abortions ?? "-")} / ${esc(m.cesareans ?? "-")}</td></tr></table>
     ${pregs.length ? `<h4>الحمول</h4>${pregs.map((g) => `<p>${esc(g.lmp)} → ${g.status === "active" ? `حامل حالياً · الولادة المتوقعة ${esc(g.eddUs || g.eddLmp)}` : g.delivery ? `ولادة ${esc(g.delivery.type || "")} ${esc(g.delivery.date)}` : esc(g.endNote || "")}</p>`).join("")}` : ""}
