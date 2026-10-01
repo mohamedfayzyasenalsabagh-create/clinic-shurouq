@@ -608,11 +608,86 @@ async function renderMessages() {
 }
 
 // ---------- شاشة الانتظار ----------
+// ---------- شاشة الانتظار (وضع التلفاز) ----------
+function openTvMode() {
+  const ov = document.createElement("div");
+  ov.className = "tvx";
+  ov.innerHTML = `
+    <div class="tvx-top">
+      <div class="tvx-brand">${logoHtml(S.pub, 84)}<div><b>${esc(S.pub.name || "")}</b><span>${esc(S.pub.title || "")}</span></div></div>
+      <div class="tvx-clock"><b class="tvx-time">--:--</b><span class="tvx-date"></span></div>
+    </div>
+    <div class="tvx-main">
+      <div class="tvx-label">الدور الحالي</div>
+      <div class="tvx-num">—</div>
+      <div class="tvx-doc"></div>
+    </div>
+    <div class="tvx-side"><div class="tvx-label sm">في الانتظار</div><div class="tvx-wait"></div></div>
+    <div class="tvx-foot">نتمنى لكم دوام الصحة والعافية</div>
+    <div class="tvx-ctl"><button class="btn primary tvx-next">استدعاء الدور التالي</button><button class="btn tvx-exit">خروج</button></div>`;
+  document.body.appendChild(ov);
+  document.body.classList.add("tv-on");
+  const unsubs = [];
+  let lastNum = null, ctlTimer = null, wake = null;
+  const showCtl = () => { ov.classList.add("ctl"); clearTimeout(ctlTimer); ctlTimer = setTimeout(() => ov.classList.remove("ctl"), 4000); };
+  ov.addEventListener("click", (e) => { if (!e.target.closest(".tvx-ctl")) showCtl(); });
+  showCtl();
+  const tick = () => {
+    const d = new Date();
+    ov.querySelector(".tvx-time").textContent = d.toLocaleTimeString("ar-SY-u-nu-latn", { hour: "numeric", minute: "2-digit" });
+    ov.querySelector(".tvx-date").textContent = d.toLocaleDateString("ar-SY-u-nu-latn", { weekday: "long", day: "numeric", month: "long" });
+  };
+  tick(); const clock = setInterval(tick, 15000);
+  const chime = () => {
+    try {
+      const ac = new (window.AudioContext || window.webkitAudioContext)();
+      [[880, 0], [660, 0.32]].forEach(([f, t]) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = "sine"; o.frequency.value = f; o.connect(g); g.connect(ac.destination);
+        g.gain.setValueAtTime(0.0001, ac.currentTime + t); g.gain.exponentialRampToValueAtTime(0.35, ac.currentTime + t + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + t + 0.9);
+        o.start(ac.currentTime + t); o.stop(ac.currentTime + t + 1);
+      });
+    } catch {}
+  };
+  unsubs.push(onSnapshot(P.colDoc("live", "queue"), (s) => {
+    const n = s.data()?.number ?? "—", el = ov.querySelector(".tvx-num");
+    el.textContent = n; el.classList.toggle("empty", n === "—");
+    ov.querySelector(".tvx-label").textContent = n === "—" ? "أهلا وسهلا بكم" : "الدور الحالي";
+    if (n === "—") el.textContent = "بانتظار الدور الأول";
+    ov.querySelector(".tvx-doc").textContent = s.data()?.doctor ? `يرجى التوجه إلى د. ${s.data().doctor}` : (n !== "—" ? "يرجى التوجه إلى غرفة الطبيب" : "");
+    if (lastNum !== null && n !== lastNum) { el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); chime(); }
+    lastNum = n;
+  }));
+  unsubs.push(onSnapshot(query(P.col("appointments"), where("date", "==", ymd())), (s) => {
+    const w = s.docs.map((d) => d.data()).filter((a) => a.status === "arrived" && a.queueNo).sort((a, b) => a.queueNo - b.queueNo);
+    ov.querySelector(".tvx-wait").innerHTML = w.length ? w.slice(0, 8).map((a) => `<span>${a.queueNo}</span>`).join("") : `<i>لا يوجد</i>`;
+  }));
+  // ملء الشاشة الحقيقي + إبقاء الشاشة مضاءة
+  try { (ov.requestFullscreen || ov.webkitRequestFullscreen)?.call(ov)?.catch?.(() => {}); } catch {}
+  try { window.AndroidApp?.setFullscreen?.(true); } catch {}
+  navigator.wakeLock?.request("screen").then((l) => { wake = l; }).catch(() => {});
+  const close = () => {
+    unsubs.forEach((u) => { try { u(); } catch {} });
+    clearInterval(clock); clearTimeout(ctlTimer);
+    try { if (document.fullscreenElement) document.exitFullscreen(); else if (document.webkitFullscreenElement) document.webkitExitFullscreen(); } catch {}
+    try { window.AndroidApp?.setFullscreen?.(false); } catch {}
+    try { wake?.release(); } catch {}
+    document.removeEventListener("keydown", onKey); window.removeEventListener("hashchange", close);
+    document.body.classList.remove("tv-on"); ov.remove();
+  };
+  const onKey = (e) => { if (e.key === "Escape") close(); };
+  document.addEventListener("keydown", onKey);
+  window.addEventListener("hashchange", close);
+  ov.querySelector(".tvx-exit").onclick = close;
+  ov.querySelector(".tvx-next").onclick = () => $(".next")?.click();
+}
+
 function renderTv() {
   main().innerHTML = `<div class="tv">
     <div class="tv-brand">${logoHtml(S.pub, 90)}<div><h1>${esc(S.pub.name)}</h1><p>${esc(S.pub.title || "")}</p></div></div>
     <div class="tv-label">الدور الحالي</div><div class="tv-num">—</div>
-    <div class="row gap no-tv"><button class="btn primary next">استدعاء الدور التالي</button><button class="btn fs">ملء الشاشة</button></div>
+    <div class="row gap no-tv"><button class="btn primary next">استدعاء الدور التالي</button><button class="btn fs">تشغيل على التلفاز (ملء الشاشة)</button></div>
   </div>`;
   S.unsub.push(onSnapshot(P.colDoc("live", "queue"), (s) => {
     const el = $(".tv-num");
@@ -626,7 +701,7 @@ function renderTv() {
     await updateDoc(P.colDoc("appointments", a.id), { status: "in" });
     await callNumber(a.queueNo);
   };
-  $(".fs").onclick = () => document.documentElement.requestFullscreen?.();
+  $(".fs").onclick = openTvMode;
 }
 
 // ---------- الإعدادات ----------

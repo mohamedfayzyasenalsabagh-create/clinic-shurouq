@@ -1,5 +1,5 @@
 // يخلي التطبيق يفتح بسرعة وبدون إنترنت (البيانات بتتزامن لما يرجع النت)
-const CACHE = "clinic-v9";
+const CACHE = "clinic-v10";
 const SHELL = ["./", "index.html", "styles.css", "app.js", "fb.js", "ui.js", "staff.js", "card.js", "patient.js", "config.js", "manifest.json", "icon.svg", "icon-192.png"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", (e) => {

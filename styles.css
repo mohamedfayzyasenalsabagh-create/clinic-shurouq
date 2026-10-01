@@ -299,3 +299,37 @@ img.full { width: 100%; border-radius: 8px; }
 /* حقوق الملكية */
 .copyright { color: var(--muted); font-size: .75rem; text-align: center; margin-top: 10px; opacity: .85; }
 .copyright span { direction: ltr; unicode-bidi: isolate; }
+
+/* شاشة الانتظار بملء الشاشة */
+body.tv-on { overflow: hidden; }
+.tvx { position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--accent) 70%, #fff) 0, transparent 45%), linear-gradient(160deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #000)); color: #fff;
+  display: grid; grid-template-columns: 1fr minmax(180px, 26%); grid-template-rows: auto 1fr auto; gap: 2vh 3vw; padding: 4vh 4vw; font-family: inherit; cursor: none; }
+.tvx.ctl { cursor: default; }
+.tvx-top { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+.tvx-brand { display: flex; align-items: center; gap: 2vw; }
+.tvx-brand .logo-img, .tvx-brand svg { background: #fff; border-radius: 24px; padding: 6px; }
+.tvx-brand b { display: block; font-size: clamp(22px, 3.4vw, 54px); }
+.tvx-brand span { opacity: .85; font-size: clamp(14px, 1.8vw, 28px); }
+.tvx-clock { text-align: left; }
+.tvx-clock b { display: block; font-size: clamp(26px, 4vw, 64px); line-height: 1.1; }
+.tvx-clock span { opacity: .85; font-size: clamp(13px, 1.6vw, 24px); }
+.tvx-main { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,.1); border: 2px solid rgba(255,255,255,.2); border-radius: 4vh; }
+.tvx-label { font-size: clamp(20px, 3vw, 48px); opacity: .9; font-weight: 600; }
+.tvx-label.sm { font-size: clamp(16px, 2vw, 32px); margin-bottom: 2vh; }
+.tvx-num { font-size: clamp(110px, 24vh, 340px); font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.tvx-num.pulse { animation: tvpulse 1.2s ease 3; }
+@keyframes tvpulse { 0%, 100% { transform: scale(1); } 40% { transform: scale(1.12); text-shadow: 0 0 40px rgba(255,255,255,.7); } }
+.tvx-doc { font-size: clamp(18px, 2.6vw, 42px); min-height: 1.4em; opacity: .95; }
+.tvx-side { background: rgba(0,0,0,.18); border-radius: 4vh; padding: 3vh 2vw; display: flex; flex-direction: column; align-items: center; }
+.tvx-wait { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6vh 1.2vw; width: 100%; }
+.tvx-wait span { background: #fff; color: var(--accent); border-radius: 2vh; font-size: clamp(22px, 4vh, 56px); font-weight: 800; text-align: center; padding: 1vh 0; }
+.tvx-wait i { grid-column: 1 / -1; text-align: center; opacity: .8; font-style: normal; font-size: clamp(16px, 2vw, 28px); }
+.tvx-foot { grid-column: 1 / -1; text-align: center; opacity: .85; font-size: clamp(14px, 1.8vw, 28px); }
+.tvx-ctl { position: absolute; bottom: 3vh; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; opacity: 0; pointer-events: none; transition: opacity .3s; }
+.tvx.ctl .tvx-ctl { opacity: 1; pointer-events: auto; }
+@media (orientation: portrait) {
+  .tvx { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto auto; }
+  .tvx-wait { grid-template-columns: repeat(4, 1fr); }
+}
+
+.tvx-num.empty { font-size: clamp(28px, 5vh, 64px); font-weight: 600; opacity: .85; }
