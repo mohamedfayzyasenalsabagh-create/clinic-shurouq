@@ -4,7 +4,7 @@ import {
   serverTimestamp, runTransaction, arrayUnion, orderBy, limit, Timestamp, registerPatient, audit,
   createStaff, resetStaffPassword, normPhone
 } from "./fb.js";
-import { COPYRIGHT,
+import { APP_URL, COPYRIGHT,
   $, $$, esc, ymd, addDays, parseYmd, fmtDate, fmtTime, tsDate, money, toast, errMsg, modal, confirmBox, info,
   field, select, logoHtml, waLink, debounce, download, empty, compressImage, pickFile, DAYS, MONTHS, daysBetween
 } from "./ui.js";
@@ -411,11 +411,12 @@ export async function newPatientModal() {
     onOk: async (f) => {
       const dup = PC.list.find((p) => p.phone === normPhone(f.phone) && p.name.trim() === f.name.trim());
       if (dup && !(await confirmBox("توجد مريضة بالاسم والرقم نفسيهما", "هل تريدين تسجيلها مرة أخرى؟", "تسجيل"))) return false;
-      return await registerPatient(f);
+      const res = await registerPatient(f);
+      return res && { ...res, name: f.name.trim() };
     }
   });
   if (!r) return;
-  showCredentials(r.phone, r.tempPassword, PC.byId[r.pid]?.name || "", r.shared);
+  showCredentials(r.phone, r.tempPassword, r.name || PC.byId[r.pid]?.name || "", r.shared);
   go(`#/p/${r.pid}/${isDoctor() ? "summary" : "info"}`);
 }
 
@@ -424,7 +425,7 @@ export function showCredentials(phone, temp, name, shared = false) {
   if (shared) {
     return info("تم التسجيل", `<p>لهذا الرقم حساب سابق (رقم مشترك). أُضيفت المريضة الجديدة إلى الحساب نفسه، وتختار ملفها عند الدخول.</p>`);
   }
-  const text = `أهلاً ${name}، هذا حسابك في تطبيق ${S.pub.name}:\nالرابط: ${url}\nرقم الجوال: ${phone}\nكلمة المرور المؤقتة: ${temp}\nسيُطلب منكِ تغييرها عند أول دخول.`;
+  const text = `أهلاً ${name}، هذا حسابك في تطبيق ${S.pub.name}:\n\nحمّلي التطبيق من هنا:\n${APP_URL}\n\nرقم الجوال: ${phone}\nكلمة المرور المؤقتة: ${temp}\nسيُطلب منكِ تغييرها عند أول دخول.\n\nإذا كان جوالك آيفون، افتحي هذا الرابط بدلاً من التطبيق:\n${url}`;
   info("حساب المريضة جاهز", `
     <div class="cred"><div>رقم الدخول: <b dir="ltr">${esc(phone)}</b></div><div>كلمة المرور المؤقتة: <b class="big" dir="ltr">${esc(temp)}</b></div></div>
     <p class="muted small">سلّميها للمريضة، وسيُطلب منها تغييرها عند أول دخول. لن تتمكني من رؤيتها مرة أخرى.</p>
@@ -742,7 +743,7 @@ async function renderStaff() {
 }
 function staffCred(phone, temp, name) {
   const url = location.origin + location.pathname;
-  const text = `أهلاً ${name}، حسابك في نظام ${S.pub.name}:\nالرابط: ${url}\nاختاري "فريق العيادة"\nالرقم: ${phone}\nكلمة المرور المؤقتة: ${temp}`;
+  const text = `أهلاً ${name}، حسابك في نظام ${S.pub.name}:\n\nحمّلي التطبيق من هنا:\n${APP_URL}\n\nاختاري «فريق العيادة»\nالرقم: ${phone}\nكلمة المرور المؤقتة: ${temp}\n\nعلى الآيفون أو الحاسوب استخدمي هذا الرابط:\n${url}`;
   info("الحساب جاهز", `<div class="cred"><div>الرقم: <b dir="ltr">${esc(phone)}</b></div><div>كلمة المرور المؤقتة: <b class="big" dir="ltr">${esc(temp)}</b></div></div>
     <a class="btn primary block" target="_blank" rel="noopener" href="${esc(waLink(phone, text))}">إرسال على واتساب</a>`);
 }
