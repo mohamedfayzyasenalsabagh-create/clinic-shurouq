@@ -653,7 +653,7 @@ function openTvMode() {
     ov.querySelector(".tvx-date").textContent = d.toLocaleDateString("ar-SY-u-nu-latn", { weekday: "long", day: "numeric", month: "long" });
   };
   tick(); const clock = setInterval(tick, 15000);
-  // صوت الاستدعاء: نغمة تنبيه قوية ثم صوت ينطق الرقم
+  // صوت الاستدعاء: نغمة تنبيه قوية
   let ac = null;
   const audio = () => {
     try { if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === "suspended") ac.resume(); } catch {}
@@ -667,22 +667,9 @@ function openTvMode() {
     g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + len);
     o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + len + 0.05);
   };
-  const playClip = (ctx, n) => new Promise((res) => {
-    if (!(n >= 1 && n <= 150)) return res(false);
-    fetch(`./voice/${n}.mp3`).then((r) => (r.ok ? r.arrayBuffer() : Promise.reject())).then((buf) => {
-      ctx.decodeAudioData(buf, (b) => {
-        const src = ctx.createBufferSource(), g = ctx.createGain();
-        g.gain.value = 1; src.buffer = b; src.connect(g); g.connect(ctx.destination);
-        src.onended = () => res(true); src.start();
-      }, () => res(false));
-    }).catch(() => res(false));
-  });
-  const chime = async (n) => {
+  const chime = () => {
     const ctx = audio(); if (!ctx) return;
     try { [[784, 0], [988, 0.45], [784, 0.9]].forEach(([f, t]) => tone(ctx, f, t, 1.1, 0.7)); } catch {}
-    await new Promise((r) => setTimeout(r, 1700));
-    const ok = await playClip(ctx, Number(n));
-    if (ok) { await new Promise((r) => setTimeout(r, 700)); await playClip(ctx, Number(n)); }
   };
   ov.addEventListener("click", audio);
   unsubs.push(onSnapshot(P.colDoc("live", "queue"), (s) => {
@@ -691,7 +678,7 @@ function openTvMode() {
     ov.querySelector(".tvx-label").textContent = n === "—" ? "أهلا وسهلا بكم" : "الدور الحالي";
     if (n === "—") el.textContent = "بانتظار الدور الأول";
     ov.querySelector(".tvx-doc").textContent = s.data()?.doctor ? `يرجى التوجه إلى د. ${s.data().doctor}` : (n !== "—" ? "يرجى التوجه إلى غرفة الطبيب" : "");
-    if (lastNum !== null && n !== lastNum) { el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); chime(n); }
+    if (lastNum !== null && n !== lastNum) { el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); chime(); }
     lastNum = n;
   }));
   unsubs.push(onSnapshot(query(P.col("appointments"), where("date", "==", ymd())), (s) => {
