@@ -851,7 +851,7 @@ async function renderStaff() {
 }
 function staffCred(phone, temp, name) {
   const url = location.origin + location.pathname;
-  const text = `أهلاً ${name}، حسابك في نظام ${S.pub.name}:\n\nحمّلي التطبيق من هنا:\n${APP_URL}\n\nاختاري «فريق العيادة»\nالرقم: ${phone}\nكلمة المرور المؤقتة: ${temp}\n\nعلى الآيفون أو الحاسوب استخدمي هذا الرابط:\n${url}`;
+  const text = `أهلاً ${name}، حسابك في نظام ${S.pub.name}:\n\nحمّلي التطبيق من هنا:\n${APP_URL}\n\nبعد فتحه اضغطي «دخول» واكتبي:\nرقم الجوال: ${phone}\nكلمة المرور المؤقتة: ${temp}\n\nعلى الآيفون أو الحاسوب استخدمي هذا الرابط:\n${url}`;
   info("الحساب جاهز", `<div class="cred"><div>الرقم: <b dir="ltr">${esc(phone)}</b></div><div>كلمة المرور المؤقتة: <b class="big" dir="ltr">${esc(temp)}</b></div></div>
     <a class="btn primary block" target="_blank" rel="noopener" href="${esc(waLink(phone, text))}">إرسال على واتساب</a>`);
 }

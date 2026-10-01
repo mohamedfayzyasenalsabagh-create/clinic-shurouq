@@ -77,23 +77,18 @@ function pickBrand(c) {
   return { name, doctorName, title, address, phone, accent, logo };
 }
 
-// ---------- شاشة الدخول ----------
+// ---------- شاشة الدخول الموحدة ----------
+// خانة واحدة للجميع: المريضة والسكرتارية والطبيبة
 function showLogin(msg = "") {
-  let kind = "p";
-  const render = () => {
-    root().innerHTML = `<div class="center-page login-page">
+  root().innerHTML = `<div class="center-page login-page">
       <div class="brand-block">
         ${logoHtml(S.pub, 96)}
         <h1>${esc(S.pub.doctorName ? "د. " + S.pub.doctorName : S.pub.name || "العيادة")}</h1>
         <p>${esc(S.pub.title || "")}</p>
       </div>
       <div class="card narrow">
-        <div class="seg" role="tablist">
-          <button role="tab" class="${kind === "p" ? "on" : ""}" data-k="p" aria-selected="${kind === "p"}">دخول المريضة</button>
-          <button role="tab" class="${kind === "s" ? "on" : ""}" data-k="s" aria-selected="${kind === "s"}">فريق العيادة</button>
-        </div>
         <form id="lf" class="stack">
-          ${field(kind === "p" ? "رقم الجوال" : "رقم الجوال أو البريد الإلكتروني", "id", { required: true, attrs: `inputmode="${kind === "p" ? "tel" : "text"}" autocomplete="username" dir="ltr"`, placeholder: "09xxxxxxxx" })}
+          ${field("رقم الجوال أو البريد الإلكتروني", "id", { required: true, attrs: 'autocomplete="username" dir="ltr" autocapitalize="off"', placeholder: "09xxxxxxxx" })}
           ${field("كلمة المرور", "pw", { type: "password", required: true, attrs: 'autocomplete="current-password" dir="ltr"' })}
           ${msg ? `<div class="alert">${esc(msg)}</div>` : ""}
           <button class="btn primary block" type="submit">دخول</button>
@@ -103,27 +98,29 @@ function showLogin(msg = "") {
       <p class="muted small">${esc(S.pub.address || "")} ${S.pub.phone ? `· <span dir="ltr">${esc(S.pub.phone)}</span>` : ""}</p>
       <p class="copyright">${esc(COPYRIGHT)}</p>
     </div>`;
-    root().querySelectorAll(".seg button").forEach((b) => b.onclick = () => { kind = b.dataset.k; msg = ""; render(); });
-    $("#lf").onsubmit = async (e) => {
-      e.preventDefault();
-      const btn = e.target.querySelector("[type=submit]");
-      btn.disabled = true; btn.textContent = "يرجى الانتظار…";
-      try { await login(e.target.id.value, e.target.pw.value, kind); }
-      catch (err) { msg = errMsg(err); render(); }
-    };
-    $(".forgot").onclick = async () => {
-      const v = $("#lf").id.value.trim();
-      if (kind === "s" && v.includes("@")) {
-        try { await sendPasswordResetEmail(auth, v); toast("أُرسل رابط تغيير كلمة المرور إلى بريدك الإلكتروني"); }
-        catch (e) { toast(errMsg(e), true); }
-        return;
-      }
-      info("نسيت كلمة المرور", kind === "p"
-        ? `<p>تواصلي مع العيادة للحصول على كلمة مرور جديدة.</p>${S.pub.phone ? `<p><a class="btn primary" href="tel:${esc(S.pub.phone)}">اتصال بالعيادة</a></p>` : ""}`
-        : `<p>السكرتارية: تمنحكِ الطبيبة كلمة مرور جديدة من قسم الموظفين.</p><p>الطبيبة: إذا سجّلتِ بريداً إلكترونياً عند الإعداد، فاكتبيه في خانة الدخول واضغطي "نسيت كلمة المرور" ليصلك رابط التغيير.</p>`);
-    };
+  $("#lf").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = e.target, btn = f.querySelector("[type=submit]");
+    btn.disabled = true; btn.textContent = "يرجى الانتظار…";
+    try { await login(f.id.value, f.pw.value); }
+    catch (err) {
+      const box = f.querySelector(".alert") || Object.assign(document.createElement("div"), { className: "alert" });
+      box.textContent = errMsg(err); if (!box.parentNode) btn.before(box);
+      btn.disabled = false; btn.textContent = "دخول";
+    }
   };
-  render();
+  $(".forgot").onclick = async () => {
+    const v = $("#lf").id.value.trim();
+    if (v.includes("@")) {
+      try { await sendPasswordResetEmail(auth, v); toast("أُرسل رابط تغيير كلمة المرور إلى بريدك الإلكتروني"); }
+      catch (e) { toast(errMsg(e), true); }
+      return;
+    }
+    info("نسيت كلمة المرور", `<p><b>المريضات:</b> تواصلي مع العيادة للحصول على كلمة مرور جديدة.</p>
+      <p><b>السكرتارية:</b> تمنحكِ الطبيبة كلمة مرور جديدة من قسم الموظفين.</p>
+      <p><b>الطبيبة:</b> اكتبي بريدك الإلكتروني في خانة الدخول واضغطي «نسيت كلمة المرور» ليصلك رابط التغيير.</p>
+      ${S.pub.phone ? `<p><a class="btn primary" href="tel:${esc(S.pub.phone)}">اتصال بالعيادة</a></p>` : ""}`);
+  };
 }
 
 // ---------- الإعداد الأول (مرة وحدة بس) ----------

@@ -98,13 +98,16 @@ export async function login(idText, password, kind) {
   }
   const phone = normPhone(id);
   if (phone.length < 9) throw new Error("رقم الجوال غير صحيح");
+  // دون اختيار نوع الحساب: نجرب حساب المريضة ثم حساب فريق العيادة
   let lastErr = null;
-  for (let v = 1; v <= MAX_VER; v++) {
-    try {
-      return (await signInWithEmailAndPassword(auth, loginEmail(phone, kind, v), password)).user;
-    } catch (e) {
-      lastErr = e;
-      if (e.code === "auth/too-many-requests" || e.code === "auth/network-request-failed") break;
+  for (const k of kind ? [kind] : ["p", "s"]) {
+    for (let v = 1; v <= MAX_VER; v++) {
+      try {
+        return (await signInWithEmailAndPassword(auth, loginEmail(phone, k, v), password)).user;
+      } catch (e) {
+        lastErr = e;
+        if (e.code === "auth/too-many-requests" || e.code === "auth/network-request-failed") throw e;
+      }
     }
   }
   throw lastErr || new Error("login failed");
