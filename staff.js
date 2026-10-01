@@ -691,11 +691,16 @@ function openTvMode() {
     document.removeEventListener("keydown", onKey); window.removeEventListener("hashchange", close);
     document.body.classList.remove("tv-on"); ov.remove();
   };
-  const onKey = (e) => { if (e.key === "Escape") close(); };
+  // ريموت التلفاز: أي زر يظهر أزرار التحكم
+  const onKey = (e) => {
+    if (e.key === "Escape" || e.key === "GoBack" || e.key === "BrowserBack") return close();
+    if (!ov.classList.contains("ctl")) { e.preventDefault(); showCtl(); ov.querySelector(".tvx-next").focus(); return; }
+    showCtl();
+  };
   document.addEventListener("keydown", onKey);
   window.addEventListener("hashchange", close);
   ov.querySelector(".tvx-exit").onclick = close;
-  ov.querySelector(".tvx-next").onclick = () => $(".next")?.click();
+  ov.querySelector(".tvx-next").onclick = () => { showCtl(); callNext(); };
 }
 
 // استدعاء الدور التالي: يحدّث شاشة الانتظار على كل الأجهزة فوراً

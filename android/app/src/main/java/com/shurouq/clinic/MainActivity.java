@@ -1,5 +1,6 @@
 package com.shurouq.clinic;
 
+import android.os.Build;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -99,11 +100,24 @@ public class MainActivity extends Activity {
                 android.view.View d = getWindow().getDecorView();
                 if (on) {
                     getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    if (Build.VERSION.SDK_INT >= 30) {
+                        getWindow().setDecorFitsSystemWindows(false);
+                        android.view.WindowInsetsController c = getWindow().getInsetsController();
+                        if (c != null) {
+                            c.hide(android.view.WindowInsets.Type.statusBars() | android.view.WindowInsets.Type.navigationBars());
+                            c.setSystemBarsBehavior(android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                        }
+                    }
                     d.setSystemUiVisibility(android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
                         | android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
                 } else {
                     getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    if (Build.VERSION.SDK_INT >= 30) {
+                        getWindow().setDecorFitsSystemWindows(true);
+                        android.view.WindowInsetsController c = getWindow().getInsetsController();
+                        if (c != null) c.show(android.view.WindowInsets.Type.statusBars() | android.view.WindowInsets.Type.navigationBars());
+                    }
                     d.setSystemUiVisibility(0);
                 }
             });
