@@ -339,3 +339,4 @@ body.tv-on { overflow: hidden; }
 .appt-li .arrive { position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); border: 0; background: var(--accent); color: #fff; font: inherit; font-size: .82rem; font-weight: 700; padding: 6px 12px; border-radius: 999px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
 .appt-li .arrive:disabled { opacity: .6; }
 .ghost-chip { visibility: hidden; min-width: 64px; }
+.call-next { margin: 0 0 12px; padding: 14px; font-size: 1.05rem; }

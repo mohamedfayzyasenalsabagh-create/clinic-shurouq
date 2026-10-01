@@ -147,6 +147,7 @@ async function renderHome() {
       <div class="stat"><b>${done}</b><span>انتهت</span></div>
     </div>
     ${doctorBits}
+    ${waiting ? `<button class="btn primary block call-next">📢 استدعاء الدور التالي · ${waiting} بالانتظار</button>` : ""}
     <section class="card">
       <div class="row-between"><h3>مواعيد اليوم</h3><a class="btn small" href="#/appts">جميع المواعيد</a></div>
       ${appts.length ? `<ul class="appt-list">${appts.map(apptRow).join("")}</ul>` : empty("لا توجد مواعيد اليوم")}
@@ -157,6 +158,7 @@ async function renderHome() {
         <span class="t">${esc(DAYS[parseYmd(a.date).getDay()])} ${parseYmd(a.date).getDate()}/${parseYmd(a.date).getMonth() + 1} · ${esc(fmtTime(a.time))}</span>
         <span class="n">${esc(a.patientName)}</span><span class="chip">${esc(a.type || "")}</span></button></li>`).join("")}</ul>` : empty("لا توجد مواعيد")}
     </section>`;
+  $(".call-next")?.addEventListener("click", async () => { await callNext(); render(); });
   bindApptButtons([...appts, ...week]);
 }
 
@@ -696,6 +698,17 @@ function openTvMode() {
   ov.querySelector(".tvx-next").onclick = () => $(".next")?.click();
 }
 
+// استدعاء الدور التالي: يحدّث شاشة الانتظار على كل الأجهزة فوراً
+async function callNext() {
+  const today = ymd();
+  const arr = (await list(query(P.col("appointments"), where("date", "==", today)))).filter((a) => a.status === "arrived" && a.queueNo).sort((a, b) => a.queueNo - b.queueNo);
+  if (!arr.length) return info("لا يوجد أحد في الانتظار", `<p>يأخذ المريضة رقم الدور عند وصوله إلى العيادة.</p><p>من «المواعيد» افتح موعد المريضة واضغط <b>«حضر ✓»</b>، فيظهر رقمه هنا وعلى شاشة التلفاز، ثم اضغط «استدعاء الدور التالي».</p>`);
+  const a = arr[0];
+  await updateDoc(P.colDoc("appointments", a.id), { status: "in" });
+  await callNumber(a.queueNo);
+  toast(`تم استدعاء الرقم ${a.queueNo}`);
+}
+
 function renderTv() {
   main().innerHTML = `<div class="tv">
     <div class="tv-brand">${logoHtml(S.pub, 90)}<div><h1>${esc(S.pub.name)}</h1><p>${esc(S.pub.title || "")}</p></div></div>
@@ -707,14 +720,7 @@ function renderTv() {
     const el = $(".tv-num");
     if (el) { el.textContent = s.data()?.number ?? "—"; el.classList.remove("pulse"); void el.offsetWidth; el.classList.add("pulse"); }
   }));
-  $(".next").onclick = async () => {
-    const today = ymd();
-    const arr = (await list(query(P.col("appointments"), where("date", "==", today)))).filter((a) => a.status === "arrived" && a.queueNo).sort((a, b) => a.queueNo - b.queueNo);
-    if (!arr.length) return info("لا يوجد أحد في الانتظار", `<p>يأخذ المريضة رقم الدور عند وصوله إلى العيادة.</p><p>من «المواعيد» افتح موعد المريضة واضغط <b>«حضر ✓»</b>، فيظهر رقمه هنا وعلى شاشة التلفاز، ثم اضغط «استدعاء الدور التالي».</p>`);
-    const a = arr[0];
-    await updateDoc(P.colDoc("appointments", a.id), { status: "in" });
-    await callNumber(a.queueNo);
-  };
+  $(".next").onclick = callNext;
   $(".fs").onclick = openTvMode;
 }
 
