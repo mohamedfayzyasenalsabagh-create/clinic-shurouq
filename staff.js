@@ -161,14 +161,27 @@ async function renderHome() {
 }
 
 function apptRow(a) {
-  return `<li><button class="appt st-${a.status}" data-a="${a.id}">
+  const quick = a.status === "confirmed" && a.date === ymd();
+  return `<li class="appt-li"><button class="appt st-${a.status}" data-a="${a.id}">
     <span class="t">${esc(fmtTime(a.time))}${a.queueNo ? ` <span class="q">#${a.queueNo}</span>` : ""}</span>
     <span class="n">${esc(a.patientName)}<small>${esc(a.type || "")}</small></span>
-    <span class="chip st">${esc(STATUS[a.status] || a.status)}</span></button></li>`;
+    ${quick ? `<span class="chip st ghost-chip"></span>` : `<span class="chip st">${esc(STATUS[a.status] || a.status)}</span>`}</button>${quick ? `<button class="arrive" data-arr="${a.id}" aria-label="تسجيل الحضور">حضر ✓</button>` : ""}</li>`;
 }
 function bindApptButtons(arr) {
   const map = Object.fromEntries(arr.map((a) => [a.id, a]));
   $$("[data-a]").forEach((b) => b.onclick = () => apptActions(map[b.dataset.a]));
+  $$("[data-arr]").forEach((b) => b.onclick = async (e) => {
+    e.stopPropagation();
+    const a = map[b.dataset.arr]; if (!a) return;
+    b.disabled = true;
+    try {
+      const q = a.queueNo || await nextQueueNo(a.date);
+      await updateDoc(P.colDoc("appointments", a.id), { status: "arrived", queueNo: q, updatedAt: serverTimestamp() });
+      await audit(`تغيير حالة موعد إلى ${STATUS.arrived}`, a.patientName);
+      toast(`تم تسجيل الحضور · رقم الدور ${q}`);
+      render();
+    } catch (err) { b.disabled = false; toast(errMsg(err), true); }
+  });
 }
 
 // ---------- إجراءات الموعد ----------
@@ -199,7 +212,7 @@ export async function apptActions(a) {
     try {
       if (["arrived", "in", "done", "noshow"].includes(act)) {
         const patch = { status: act, updatedAt: serverTimestamp() };
-        if (act === "arrived" && !a.queueNo) patch.queueNo = await nextQueueNo(a.date);
+        if ((act === "arrived" || act === "in") && !a.queueNo) patch.queueNo = await nextQueueNo(a.date);
         await updateDoc(P.colDoc("appointments", a.id), patch);
         await audit(`تغيير حالة موعد إلى ${STATUS[act]}`, a.patientName);
         toast("تم");
@@ -686,6 +699,7 @@ function openTvMode() {
 function renderTv() {
   main().innerHTML = `<div class="tv">
     <div class="tv-brand">${logoHtml(S.pub, 90)}<div><h1>${esc(S.pub.name)}</h1><p>${esc(S.pub.title || "")}</p></div></div>
+    <p class="muted small tv-help">الدور يعمل لمواعيد اليوم: عند وصول المريضة افتح موعده واضغط «حضر ✓» ليأخذ رقماً، ثم استدعه من هنا.</p>
     <div class="tv-label">الدور الحالي</div><div class="tv-num">—</div>
     <div class="row gap no-tv"><button class="btn primary next">استدعاء الدور التالي</button><button class="btn fs">تشغيل على التلفاز (ملء الشاشة)</button></div>
   </div>`;
@@ -696,7 +710,7 @@ function renderTv() {
   $(".next").onclick = async () => {
     const today = ymd();
     const arr = (await list(query(P.col("appointments"), where("date", "==", today)))).filter((a) => a.status === "arrived" && a.queueNo).sort((a, b) => a.queueNo - b.queueNo);
-    if (!arr.length) return toast("لا توجد مريضات في الانتظار");
+    if (!arr.length) return info("لا يوجد أحد في الانتظار", `<p>يأخذ المريضة رقم الدور عند وصوله إلى العيادة.</p><p>من «المواعيد» افتح موعد المريضة واضغط <b>«حضر ✓»</b>، فيظهر رقمه هنا وعلى شاشة التلفاز، ثم اضغط «استدعاء الدور التالي».</p>`);
     const a = arr[0];
     await updateDoc(P.colDoc("appointments", a.id), { status: "in" });
     await callNumber(a.queueNo);

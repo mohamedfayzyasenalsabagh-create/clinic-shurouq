@@ -333,3 +333,9 @@ body.tv-on { overflow: hidden; }
 }
 
 .tvx-num.empty { font-size: clamp(28px, 5vh, 64px); font-weight: 600; opacity: .85; }
+
+/* زر تسجيل الحضور السريع */
+.appt-li { position: relative; }
+.appt-li .arrive { position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); border: 0; background: var(--accent); color: #fff; font: inherit; font-size: .82rem; font-weight: 700; padding: 6px 12px; border-radius: 999px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+.appt-li .arrive:disabled { opacity: .6; }
+.ghost-chip { visibility: hidden; min-width: 64px; }
