@@ -343,3 +343,5 @@ body.tv-on { overflow: hidden; }
 .call-next { margin: 0 0 12px; padding: 14px; font-size: 1.05rem; }
 
 .tvx-ctl .btn:focus { outline: 4px solid #fff; outline-offset: 3px; }
+.lh-addr { color: #5F6B69; font-size: .9rem; margin-top: 2px; }
+.lh-foot { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 28px; margin-top: 14px; padding-top: 10px; border-top: 3px solid var(--accent); color: #5F6B69; font-size: .9rem; }

@@ -752,6 +752,7 @@ async function renderSettings() {
       ${field("اللقب", "title", { value: c.title })}
       ${field("العنوان", "address", { value: c.address })}
       ${field("هاتف العيادة", "phone", { value: c.phone, attrs: 'dir="ltr"' })}
+      ${field("البريد الإلكتروني (يظهر أسفل الوصفة)", "email", { value: c.email || "", type: "email", attrs: 'dir="ltr"' })}
       <div class="grid2">${field("لون الواجهة", "accent", { type: "color", value: c.accent || "#6B3FA0" })}${field("العملة", "currency", { value: c.currency || "ل.س" })}</div>
     </section>
     <section class="card stack"><h3>أوقات الدوام</h3>
@@ -799,7 +800,7 @@ async function renderSettings() {
     for (let d = 0; d < 7; d++) h[d] = { on: f[`on${d}`].checked, from: f[`from${d}`].value || "10:00", to: f[`to${d}`].value || "17:00" };
     const brand = {
       name: f.name.value.trim(), doctorName: f.doctorName.value.trim(), title: f.title.value.trim(),
-      address: f.address.value.trim(), phone: f.phone.value.trim(), accent: f.accent.value,
+      address: f.address.value.trim(), phone: f.phone.value.trim(), email: f.email.value.trim(), accent: f.accent.value,
       logo: newLogo === undefined ? (c.logo || null) : newLogo
     };
     try {

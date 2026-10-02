@@ -73,8 +73,8 @@ export async function route() {
   m.start();
 }
 function pickBrand(c) {
-  const { name, doctorName, title, address, phone, accent, logo } = c;
-  return { name, doctorName, title, address, phone, accent, logo };
+  const { name, doctorName, title, address, phone, email, accent, logo } = c;
+  return { name, doctorName, title, address, phone, email, accent, logo };
 }
 
 // ---------- شاشة الدخول الموحدة ----------
