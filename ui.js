@@ -221,7 +221,9 @@ export function printDoc(pub, title, bodyHtml) {
     try { localStorage.setItem("paperSize", sz); } catch {}
     w.querySelector(".paper").classList.toggle("a5", sz === "a5");
     w.querySelectorAll("[data-sz]").forEach((x) => x.classList.toggle("on", x.dataset.sz === sz));
-    pageCss.textContent = `@media print { @page { size: ${sz === "a5" ? "A5" : "A4"}; margin: ${sz === "a5" ? "8mm" : "12mm"}; } }`;
+    // الورقة تملأ الصفحة كاملة، فتبقى الترويسة السفلية في أسفلها دائماً
+    pageCss.textContent = `@media print { @page { size: ${sz === "a5" ? "A5" : "A4"}; margin: ${sz === "a5" ? "8mm" : "12mm"}; }
+      .print-sheet .paper { min-height: ${sz === "a5" ? "193mm" : "272mm"} !important; } }`;
   };
   let saved = "a4"; try { saved = localStorage.getItem("paperSize") || "a4"; } catch {}
   setSize(saved);
