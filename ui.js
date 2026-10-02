@@ -195,6 +195,7 @@ export function printDoc(pub, title, bodyHtml) {
   w.innerHTML = `
     <div class="print-tools no-print">
       <button class="btn primary p-go">طباعة / حفظ PDF</button>
+      <div class="paper-size" role="group" aria-label="حجم الورق"><button data-sz="a4">A4 كامل</button><button data-sz="a5">نصف A4</button></div>
       <button class="btn ghost p-close">إغلاق</button>
     </div>
     <div class="paper">
@@ -213,8 +214,20 @@ export function printDoc(pub, title, bodyHtml) {
     </div>`;
   document.body.appendChild(w);
   document.body.classList.add("printing");
+  // حجم الورق: A4 أو نصف A4 (A5)، ويُحفظ على الجهاز
+  const pageCss = document.createElement("style");
+  document.head.appendChild(pageCss);
+  const setSize = (sz) => {
+    try { localStorage.setItem("paperSize", sz); } catch {}
+    w.querySelector(".paper").classList.toggle("a5", sz === "a5");
+    w.querySelectorAll("[data-sz]").forEach((x) => x.classList.toggle("on", x.dataset.sz === sz));
+    pageCss.textContent = `@media print { @page { size: ${sz === "a5" ? "A5" : "A4"}; margin: ${sz === "a5" ? "8mm" : "12mm"}; } }`;
+  };
+  let saved = "a4"; try { saved = localStorage.getItem("paperSize") || "a4"; } catch {}
+  setSize(saved);
+  w.querySelectorAll("[data-sz]").forEach((x) => x.onclick = () => setSize(x.dataset.sz));
   w.querySelector(".p-go").onclick = () => window.print();
-  w.querySelector(".p-close").onclick = () => { w.remove(); document.body.classList.remove("printing"); };
+  w.querySelector(".p-close").onclick = () => { w.remove(); pageCss.remove(); document.body.classList.remove("printing"); };
 }
 
 // ---------- مساعدات عامة ----------
