@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دليل لم الشمل</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Noto+Kufi+Arabic:wght@600;800&display=swap">
+<style>
+/* Layout: one narrow column, sticky tab bar, each tab = one step of the file */
+:root{
+  --bg:#f3f5f8; --card:#ffffff; --fg:#17212e; --muted:#5b6778; --line:#dde3ea;
+  --ink:#1d4e89; --ink-soft:#e5eef9; --stamp:#b3261e; --stamp-soft:#fbe9e7;
+  --ok:#1f7a4d; --ok-soft:#e3f4ea; --warn:#946200; --warn-soft:#fdf3d8;
+  --f-display:"Noto Kufi Arabic","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10161f; --card:#18212d; --fg:#e8edf3; --muted:#9aa7b8; --line:#2a3646;
+  --ink:#7fb0ec; --ink-soft:#1c2c42; --stamp:#f08a80; --stamp-soft:#3a1f1d;
+  --ok:#6fcf9b; --ok-soft:#173326; --warn:#e6c062; --warn-soft:#33290f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10161f; --card:#18212d; --fg:#e8edf3; --muted:#9aa7b8; --line:#2a3646;
+  --ink:#7fb0ec; --ink-soft:#1c2c42; --stamp:#f08a80; --stamp-soft:#3a1f1d;
+  --ok:#6fcf9b; --ok-soft:#173326; --warn:#e6c062; --warn-soft:#33290f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.7;direction:rtl}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--card)}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{background:var(--card);border-bottom:1px solid var(--line)}
+header.top .wrap{padding-block:22px 14px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.4}
+h1{font-size:1.6rem;font-weight:800;color:var(--ink)}
+.sub{color:var(--muted);margin:4px 0 0}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+nav.tabs button{flex:0 0 auto;font:inherit;font-weight:500;font-size:.95rem;border:1px solid var(--line);background:var(--bg);color:var(--fg);padding:7px 14px;border-radius:999px;cursor:pointer;display:flex;gap:6px;align-items:center}
+nav.tabs button .n{font-size:.75rem;background:var(--line);border-radius:999px;width:20px;height:20px;display:grid;place-items:center}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+nav.tabs button[aria-selected="true"] .n{background:var(--card);color:var(--ink)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+main .wrap{padding-block:22px 48px;display:flex;flex-direction:column;gap:18px}
+section[role=tabpanel]{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h2{font-size:1.15rem;margin-bottom:10px}
+.lead{font-size:1.05rem;margin:0}
+.muted{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit;padding:8px 14px;border-radius:10px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink-soft);color:var(--ink);font-weight:700}
+.result{margin-top:14px;padding:12px 14px;border-radius:10px;font-weight:500}
+.result.ok{background:var(--ok-soft);color:var(--ok)}
+.result.no{background:var(--stamp-soft);color:var(--stamp)}
+.note{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:.95rem}
+.price-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.price{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:2px}
+.price b{font-family:var(--f-display);font-size:1.5rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.progress{display:flex;align-items:center;gap:12px}
+.bar{flex:1;height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.group h3{font-size:1rem;color:var(--muted);margin:6px 0 8px}
+.check{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line);cursor:pointer}
+.check:first-of-type{border-top:0}
+.check input{width:22px;height:22px;margin-top:3px;accent-color:var(--ok);flex:0 0 auto}
+.check .t{font-weight:700}
+.check .d{color:var(--muted);font-size:.93rem}
+.check.done .t{text-decoration:line-through;color:var(--muted)}
+.tag{display:inline-block;font-size:.75rem;font-weight:500;background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:0 8px;margin-inline-start:6px}
+.btn{font:inherit;font-weight:500;border:1px solid var(--ink);background:var(--ink);color:var(--card);padding:9px 18px;border-radius:10px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.qcard{text-align:center;padding:28px 18px}
+.qnum{color:var(--muted);font-size:.9rem}
+.qtext{font-family:var(--f-display);font-size:1.45rem;font-weight:600;margin:10px 0 18px;min-height:2.6em;display:grid;place-items:center}
+.qcard textarea{width:100%;font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:10px;padding:10px;min-height:70px;resize:vertical}
+.qnav{display:flex;justify-content:space-between;gap:10px;margin-top:14px}
+ol.qlist{margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:6px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:500;font-size:.95rem}
+.exams{display:grid;gap:12px}
+.exam{border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;background:var(--card)}
+.exam .name{font-weight:700}
+.exam .cost{font-family:var(--f-display);font-size:1.35rem;color:var(--ink);font-variant-numeric:tabular-nums;grid-row:span 2;align-self:center}
+.exam .when{font-size:.92rem}
+.exam .parts{grid-column:1/-1;font-size:.88rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:6px;margin-top:4px}
+.exam.na{opacity:.6}
+.pill{display:inline-block;font-size:.78rem;border-radius:99px;padding:1px 10px;font-weight:500}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.soon{background:var(--warn-soft);color:var(--warn)}
+.pill.no{background:var(--stamp-soft);color:var(--stamp)}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.93rem}
+th,td{text-align:right;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:.85rem}
+td.num{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+select,input[type=number]{font:inherit;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:10px;padding:9px 10px;width:100%}
+.total{display:flex;flex-direction:column;gap:4px;margin-top:16px;padding:16px;border-radius:12px;background:var(--ink-soft)}
+.total .line{display:flex;justify-content:space-between;gap:10px;font-size:.95rem}
+.total .sum{font-family:var(--f-display);font-size:1.8rem;color:var(--ink);font-variant-numeric:tabular-nums;border-top:1px solid var(--line);padding-top:8px;margin-top:4px;display:flex;justify-content:space-between}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <h1>دليل لم الشمل إلى ألمانيا</h1>
+  <p class="sub">كل الخطوات في مكان واحد: الأهلية، الأوراق، المقابلة، وامتحان اللغة.</p>
+</div></header>
+
+<nav class="tabs" aria-label="الأقسام"><div class="wrap" role="tablist">
+  <button role="tab" id="t-start" data-tab="start" aria-selected="true"><span class="n">1</span>البداية</button>
+  <button role="tab" id="t-docs" data-tab="docs" aria-selected="false"><span class="n">2</span>الأوراق</button>
+  <button role="tab" id="t-lang" data-tab="lang" aria-selected="false"><span class="n">3</span>امتحان اللغة</button>
+  <button role="tab" id="t-trip" data-tab="trip" aria-selected="false"><span class="n">4</span>السفر والتكلفة</button>
+  <button role="tab" id="t-int" data-tab="int" aria-selected="false"><span class="n">5</span>المقابلة</button>
+</div></nav>
+
+<main><div class="wrap">
+
+<!-- 1 START -->
+<section role="tabpanel" id="p-start">
+  <div class="card">
+    <h2>هل يحق للزوج تقديم لم شمل؟</h2>
+    <p class="muted" style="margin:0 0 10px">اختر نوع إقامة الزوج في ألمانيا:</p>
+    <div class="chips" id="resChips"></div>
+    <div id="resResult" class="result" hidden></div>
+  </div>
+  <div class="card">
+    <h2>هل الزواج مثبت؟</h2>
+    <div class="chips" id="marChips">
+      <button class="chip" id="mar-yes" data-v="yes" aria-pressed="false">نعم، مثبت</button>
+      <button class="chip" id="mar-no" data-v="no" aria-pressed="false">لا، غير مثبت</button>
+    </div>
+    <div id="marYes" class="result ok" hidden>ممتاز. ستحتاج صورة عن <b>صك أو قرار الزواج</b>. تابع إلى قسم الأوراق.</div>
+    <div id="marNo" hidden style="margin-top:14px">
+      <p style="margin:0 0 10px">يجب تثبيت الزواج أولاً. يوجد خياران:</p>
+      <div class="price-row">
+        <div class="price"><span>وكالة سفارة</span><b>250$</b><span class="muted">خدمة تثبيت زواج</span></div>
+        <div class="price"><span>وكالة نوتار</span><b>850$</b><span class="muted">خدمة تثبيت زواج</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>الطريق باختصار</h2>
+    <ol class="qlist">
+      <li>تأكد من نوع الإقامة وتثبيت الزواج.</li>
+      <li>جهّز الأوراق المطلوبة وترجمها وصدّقها.</li>
+      <li>قدّم امتحان اللغة في بيروت أو الأردن.</li>
+      <li>تدرّب على أسئلة مقابلة السفارة.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- 2 DOCS -->
+<section role="tabpanel" id="p-docs" hidden>
+  <div class="card">
+    <div class="progress"><b id="docCount">0 / 0</b><div class="bar"><i id="docBar"></i></div></div>
+    <p class="muted" style="margin:8px 0 0;font-size:.9rem">علّم على كل ورقة تجهزت. تبقى العلامات محفوظة على جهازك.</p>
+  </div>
+  <div id="docGroups" style="display:flex;flex-direction:column;gap:16px"></div>
+  <div class="note">معظم الأوراق تحتاج: <b>ترجمة</b> + <b>تصديق الخارجية</b>. بيان الزواج والبيان العائلي يحتاجان أيضاً <b>تصديق السفارة الألمانية في بيروت</b>.</div>
+</section>
+
+<!-- 3 LANG -->
+<section role="tabpanel" id="p-lang" hidden>
+  <div class="card">
+    <h2>ابحث عن امتحان</h2>
+    <div class="field"><label>المستوى</label><div class="chips" id="lvlChips"></div></div>
+    <div class="field" style="margin-top:12px"><label>المكان</label><div class="chips" id="placeChips"></div></div>
+  </div>
+  <div class="exams" id="examList"></div>
+  <div class="card">
+    <h2>ماذا يشمل السعر؟</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>المعهد</th><th>يشمل</th><th>إضافات / خصومات</th></tr></thead>
+      <tbody id="inclBody"></tbody>
+    </table></div>
+  </div>
+  <div class="note">صلاحية شهادة اللغة <b>سنة واحدة</b> في جميع المعاهد.</div>
+</section>
+
+<!-- 4 TRIP -->
+<section role="tabpanel" id="p-trip" hidden>
+  <div class="card">
+    <h2>احسب التكلفة التقريبية</h2>
+    <div class="calc">
+      <div class="field"><label for="cLvl">المستوى</label><select id="cLvl"></select></div>
+      <div class="field"><label for="cInst">المعهد والمكان</label><select id="cInst"></select></div>
+      <div class="field" id="fRoom"><label for="cRoom">المبيت في لبنان</label>
+        <select id="cRoom"><option value="150">غرفة مفردة (150$)</option><option value="125">غرفة مشتركة بنات (125$)</option></select></div>
+      <div class="field" id="fBus" hidden><label for="cBus">المواصلات للأردن</label>
+        <select id="cBus"><option value="30">باصات (30$)</option><option value="100">سيارة ركاب (100$)</option></select></div>
+      <div class="field" id="fNights" hidden><label for="cNights">عدد الليالي بالفندق</label>
+        <input type="number" id="cNights" min="0" max="10" value="1"></div>
+    </div>
+    <div class="total" id="total"></div>
+    <p class="muted" style="font-size:.85rem;margin:8px 0 0">تقدير فقط حسب الأسعار في الملف. لا يشمل الإضافات الاختيارية (نتيجة مستعجلة، مرافق).</p>
+  </div>
+  <div class="card">
+    <h2>لبنان</h2>
+    <p style="margin:0">الانطلاق الساعة 3 عصراً قبل الامتحان بيوم، استلام الفندق، ثم التوجه لمركز الفحص صباح اليوم التالي.</p>
+    <div class="price-row" style="margin-top:12px">
+      <div class="price"><span>غرفة مفردة</span><b>150$</b><span class="muted">سفر + مبيت</span></div>
+      <div class="price"><span>غرفة مشتركة (بنات)</span><b>125$</b><span class="muted">سفر + مبيت</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>الأردن</h2>
+    <div class="tbl"><table><tbody>
+      <tr><td>تصريح الدخول</td><td class="num">130$</td></tr>
+      <tr><td>مواصلات ذهاب وإياب</td><td class="num">باص 30$ · سيارة 100$</td></tr>
+      <tr><td>الفندق (مع الفطور)</td><td class="num">50$ / ليلة</td></tr>
+      <tr><td>مواصلات داخلية</td><td class="num">25$</td></tr>
+    </tbody></table></div>
+  </div>
+</section>
+
+<!-- 5 INTERVIEW -->
+<section role="tabpanel" id="p-int" hidden>
+  <div class="card qcard">
+    <div class="qnum" id="qNum"></div>
+    <div class="qtext" id="qText"></div>
+    <textarea id="qAns" placeholder="اكتبي جوابك هنا للتدريب (يُحفظ على جهازك)"></textarea>
+    <div class="qnav">
+      <button class="btn ghost" id="qPrev">→ السابق</button>
+      <button class="btn" id="qNext">التالي ←</button>
+    </div>
+  </div>
+  <div class="card">
+    <h2>كل الأسئلة</h2>
+    <ol class="qlist" id="qAll"></ol>
+  </div>
+  <div class="note">جاوبي بصدق وبنفس المعلومات الموجودة في الأوراق. ركّزي على التواريخ: تاريخ تثبيت الزواج، وتاريخ دخول الزوج لألمانيا.</div>
+</section>
+
+</div></main>
+
+<script>
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* Tabs */
+const tabs=[...document.querySelectorAll('[role=tab]')];
+function openTab(id){tabs.forEach(t=>{const on=t.dataset.tab===id;t.setAttribute('aria-selected',on);document.getElementById('p-'+t.dataset.tab).hidden=!on});store.set('tab',id)}
+tabs.forEach(t=>t.onclick=()=>{openTab(t.dataset.tab);window.scrollTo({top:0})});
+openTab(store.get('tab','start'));
+
+/* 1. Eligibility */
+const RES=[["جنسية",1],["إقامة دائمة",1],["لجوء",1],["عمل",1],["حماية",0]];
+const resChips=document.getElementById('resChips'),resResult=document.getElementById('resResult');
+RES.forEach(([n,ok],i)=>{const b=document.createElement('button');b.className='chip';b.id='res-'+i;b.textContent=n;b.setAttribute('aria-pressed','false');
+  b.onclick=()=>{[...resChips.children].forEach(c=>c.setAttribute('aria-pressed',c===b));resResult.hidden=false;
+    resResult.className='result '+(ok?'ok':'no');resResult.textContent=ok?'نعم، يحق له تقديم لم شمل.':'للأسف، أصحاب إقامة الحماية غير مشمولين بلم الشمل.'};resChips.appendChild(b)});
+document.querySelectorAll('#marChips .chip').forEach(b=>b.onclick=()=>{document.querySelectorAll('#marChips .chip').forEach(c=>c.setAttribute('aria-pressed',c===b));
+  document.getElementById('marYes').hidden=b.dataset.v!=='yes';document.getElementById('marNo').hidden=b.dataset.v!=='no'});
+
+/* 2. Documents */
+const DOCS=[
+ ["أوراق الزوجة",[
+  ["صك الزواج","صادر من المحكمة الشرعية، مترجم، ومصدق خارجية"],
+  ["الوكالات (إن وجدت)","مترجمة ومصدقة خارجية — لتثبيت الزواج إن لم يكن مثبتاً"],
+  ["بيان زواج","مترجم، مصدق خارجية، ومصدق السفارة الألمانية في بيروت"],
+  ["بيان عائلي","مترجم، مصدق خارجية، ومصدق السفارة الألمانية في بيروت"],
+  ["بيان ولادة للزوجة","مترجم، ومصدق خارجية"],
+  ["إخراج قيد فردي للزوجة","مترجم، ومصدق خارجية"],
+  ["أوراق الطلاق السابق (إن وجد)","قرار طلاق + بيان طلاق، مترجمين ومصدقين خارجية والسفارة. للزوجة أو للزوج"]]],
+ ["أوراق الزوج (من ألمانيا)",[
+  ["شهادة السكن (Meldebescheinigung)","حديثة، تاريخها أقل من 6 شهور"],
+  ["عقد البيت","المساحة 17 متر مربع للشخص الواحد على الأقل"],
+  ["إثبات الشخصية","هوية ألمانية، أو جواز ألماني للمجنّس + شهادة التجنيس"],
+  ["بيان حركة","لبيان تواريخ الدخول والخروج"],
+  ["إثبات العمل","عقد العمل وبيان الراتب","إقامة دائمة ولجوء"],
+  ["البيشايد (Bescheid)","لأصحاب الإقامة الدائمة واللجوء","إقامة دائمة ولجوء"]]]];
+let done=store.get('docs',{});
+const docGroups=document.getElementById('docGroups');let total=0;
+DOCS.forEach(([g,items],gi)=>{const c=document.createElement('div');c.className='card group';c.innerHTML='<h3>'+g+'</h3>';
+  items.forEach(([t,d,tag],i)=>{total++;const id='doc-'+gi+'-'+i;const l=document.createElement('label');l.className='check';
+    l.innerHTML='<input type="checkbox" id="'+id+'"><div><div class="t">'+t+(tag?'<span class="tag">'+tag+'</span>':'')+'</div><div class="d">'+d+'</div></div>';
+    const cb=l.querySelector('input');cb.checked=!!done[id];l.classList.toggle('done',cb.checked);
+    cb.onchange=()=>{done[id]=cb.checked;l.classList.toggle('done',cb.checked);store.set('docs',done);upd()};c.appendChild(l)});
+  docGroups.appendChild(c)});
+function upd(){const n=Object.values(done).filter(Boolean).length;document.getElementById('docCount').textContent=n+' / '+total;document.getElementById('docBar').style.width=(n/total*100)+'%'}
+upd();
+
+/* 3. Language exams */
+const EX=[
+ ["A1","غوتة","بيروت",260,"متاح شهر 12 (2026) وشهر 1 (2027)","ok",""],
+ ["A1","غوتة","الأردن",240,"غير متاح حالياً، سيفتح قريباً لعام 2027","soon",""],
+ ["A1","ÖSD","بيروت",400,"شهر 11 و 12 (2027)","ok","قسم محادثة أو كتابي فقط: 300$"],
+ ["A1","ÖSD","الأردن",250,"شهر 11 و 12 (2027)","ok","قسم محادثة: 110$ · قسم كتابي: 180$"],
+ ["A2","غوتة","بيروت",280,"متاح شهر 12 (2026) وشهر 1 (2027)","ok",""],
+ ["A2","غوتة","الأردن",260,"متاح شهر 12 (2026)","ok",""],
+ ["A2","ÖSD","بيروت",420,"شهر 11 و 12 (2027)","ok","قسم كتابي أو محادثة فقط: 300$"],
+ ["A2","ÖSD","الأردن",null,"غير متاح","no",""],
+ ["B1","غوتة","بيروت",300,"متاح شهر 1 (2027)","ok","أول قسم: 140$ · كل قسم إضافي: 110$"],
+ ["B1","غوتة","الأردن",260,"غير متاح حالياً، مواعيد لعام 2027","soon","أول قسم: 140$ · كل قسم إضافي: 105$"],
+ ["B1","ÖSD","بيروت",420,"شهر 11 و 12 (2027)","ok","شفهي: 295$ · كتابي: قسم 235$، قسمين 325$، ثلاثة 375$"],
+ ["B1","ÖSD","الأردن",275,"متاح","ok","أول قسم: 150$ · قسمين: 190$ · 3 أقسام: 235$"],
+ ["B2","غوتة","بيروت",340,"متاح شهر 1 (2027)","ok","أول قسم: 160$ · كل قسم إضافي: 120$"],
+ ["B2","غوتة","الأردن",300,"غير متاح حالياً، مواعيد لعام 2027","soon","أول قسم: 140$ · كل قسم إضافي: 105$"],
+ ["B2","ÖSD","بيروت",475,"شهر 11 و 12 (2026)","ok","لا يمكن تقديم أقسام منفصلة"],
+ ["B2","ÖSD","الأردن",300,"متاح","ok","أول قسم: 150$ · قسمين: 260$"]];
+const PILL={ok:"متاح",soon:"قريباً",no:"غير متاح"};
+let lvl=store.get('lvl','A1'),place=store.get('place','الكل');
+function chipRow(el,vals,cur,set){el.innerHTML='';vals.forEach(v=>{const b=document.createElement('button');b.className='chip';b.id=el.id+'-'+v;b.textContent=v;b.setAttribute('aria-pressed',v===cur);b.onclick=()=>set(v);el.appendChild(b)})}
+function renderEx(){
+  chipRow(document.getElementById('lvlChips'),["A1","A2","B1","B2"],lvl,v=>{lvl=v;store.set('lvl',v);renderEx()});
+  chipRow(document.getElementById('placeChips'),["الكل","بيروت","الأردن"],place,v=>{place=v;store.set('place',v);renderEx()});
+  const list=document.getElementById('examList');list.innerHTML='';
+  EX.filter(e=>e[0]===lvl&&(place==='الكل'||e[2]===place)).sort((a,b)=>(a[3]??1e9)-(b[3]??1e9)).forEach(e=>{
+    const d=document.createElement('div');d.className='exam'+(e[5]==='no'?' na':'');
+    d.innerHTML='<div class="name">'+e[1]+' — '+e[2]+' <span class="pill '+e[5]+'">'+PILL[e[5]]+'</span></div><div class="cost">'+(e[3]?e[3]+'$':'—')+'</div><div class="when muted">'+e[4]+'</div>'+(e[6]?'<div class="parts">تقديم أقسام منفصلة: '+e[6]+'</div>':'');
+    list.appendChild(d)})}
+renderEx();
+const INCL=[["غوتة بيروت","رسوم الامتحان","تصريح دخول لبنان مجاناً. يرسل المعهد استمارة قبل 10 أيام لتعبئتها للتراخيص"],
+ ["غوتة الأردن","رسوم الامتحان","—"],
+ ["ÖSD بيروت","التسجيل + تصريح الدخول + استلام الشهادة","+90$ نتيجة مستعجلة · +85$ لإضافة مرافق · −85$ إن لم ترغب بتصريح الدخول"],
+ ["ÖSD الأردن","التسجيل للامتحان فقط","+30$ للحصول على الشهادة واستلامها"]];
+document.getElementById('inclBody').innerHTML=INCL.map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('');
+
+/* 4. Cost calculator */
+const cLvl=document.getElementById('cLvl'),cInst=document.getElementById('cInst');
+cLvl.innerHTML=["A1","A2","B1","B2"].map(v=>'<option>'+v+'</option>').join('');
+function fillInst(){const opts=EX.filter(e=>e[0]===cLvl.value&&e[3]);const prev=cInst.value;
+  cInst.innerHTML=opts.map(e=>'<option value="'+e[1]+'|'+e[2]+'">'+e[1]+' — '+e[2]+' ('+e[3]+'$)</option>').join('');
+  if([...cInst.options].some(o=>o.value===prev))cInst.value=prev;calc()}
+function calc(){const [inst,pl]=cInst.value.split('|');const e=EX.find(x=>x[0]===cLvl.value&&x[1]===inst&&x[2]===pl);
+  const jo=pl==='الأردن';document.getElementById('fRoom').hidden=jo;document.getElementById('fBus').hidden=!jo;document.getElementById('fNights').hidden=!jo;
+  const lines=[["رسوم الامتحان ("+inst+" "+pl+")",e[3]]];
+  if(jo){const n=Math.max(0,Math.min(10,+document.getElementById('cNights').value||0));
+    lines.push(["تصريح دخول الأردن",130],["مواصلات ذهاب وإياب",+document.getElementById('cBus').value],["الفندق: "+n+" ليلة × 50$",n*50],["مواصلات داخلية",25]);
+    if(inst==='ÖSD')lines.push(["استلام الشهادة (ÖSD الأردن)",30])}
+  else lines.push(["السفر والمبيت في لبنان",+document.getElementById('cRoom').value]);
+  const sum=lines.reduce((a,l)=>a+l[1],0);
+  document.getElementById('total').innerHTML=lines.map(l=>'<div class="line"><span>'+l[0]+'</span><span>'+l[1]+'$</span></div>').join('')+'<div class="sum"><span>المجموع</span><span>'+sum+'$</span></div>'}
+cLvl.onchange=fillInst;['cInst','cRoom','cBus','cNights'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+fillInst();
+
+/* 5. Interview */
+const Q=["شو اسم زوجك؟","قديش مواليده؟","وين ثبتو الزواج تبعكم؟","إيمتى ثبتو الزواج بالمحكمة؟ / خارج المحكمة؟","مين كان وكيلك؟","مين وكيل زوجك؟","قديش كان مهرك؟","مين بيصرف عليكي؟","كيف تعرفتي على زوجك؟","صار في حفلة خطبة أو زواج؟","شو بيشتغل زوجك؟","قديش بيقبض؟","وين ساكن زوجك؟","إلك قرايبين بألمانيا؟","ناوية تشتغلي؟","إيمتى دخل زوجك لألمانيا أول مرة؟","تزوجتو بشكل فعلي؟"];
+let qi=0,ans=store.get('ans',{});const qAns=document.getElementById('qAns');
+function showQ(){document.getElementById('qNum').textContent='سؤال '+(qi+1)+' من '+Q.length;document.getElementById('qText').textContent=Q[qi];
+  qAns.value=ans[qi]||'';document.getElementById('qPrev').disabled=qi===0;document.getElementById('qNext').disabled=qi===Q.length-1}
+qAns.oninput=()=>{ans[qi]=qAns.value;store.set('ans',ans)};
+document.getElementById('qPrev').onclick=()=>{qi--;showQ()};document.getElementById('qNext').onclick=()=>{qi++;showQ()};
+document.getElementById('qAll').innerHTML=Q.map((q,i)=>'<li><a href="#" data-i="'+i+'" style="color:inherit">'+q+'</a></li>').join('');
+document.getElementById('qAll').onclick=e=>{const a=e.target.closest('a');if(!a)return;e.preventDefault();qi=+a.dataset.i;showQ();window.scrollTo({top:0,behavior:'smooth'})};
+showQ();
+</script>
+
+</body>
+</html>
